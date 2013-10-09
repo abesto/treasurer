@@ -19,7 +19,7 @@ import org.apache.http.util.EntityUtils;
 
 public class YNABPastebinUploader implements Uploader {
 	private DefaultHttpClient http = new DefaultHttpClient();
-	private String apiKey = "yourapikey";
+	private String apiKey = "password";
 	
 	private String post(String text) throws UploadFailed {
 		HttpPost post = new HttpPost("http://pastebin.com/api/api_post.php");

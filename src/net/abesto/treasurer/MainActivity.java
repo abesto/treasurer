@@ -4,6 +4,10 @@ package net.abesto.treasurer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StreamCorruptedException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
 import net.abesto.treasurer.R;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
@@ -13,9 +17,15 @@ import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.SmsParser;
 import net.abesto.treasurer.upload.ynab.YNABCsvBuilder;
 import net.abesto.treasurer.upload.ynab.YNABPastebinUploader;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.database.Cursor;
+import android.telephony.SmsMessage;
+import android.util.Log;
 import android.view.Menu;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -24,13 +34,9 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		TextView hello = (TextView) findViewById(R.id.hello);
+		ListView list = (ListView) findViewById(R.id.listView1);
 
-		String[] messages = {
-				"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-				"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; hülye payee; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-				"ez meg eleve rossz"
-		};
+		List<String> messages = getLastMonthsMessages();		
 				
 		SmsParser p = new OTPCreditCardUsageParser();
 	    TransactionFilter f = new PayeeToCategoryFilter();
@@ -38,21 +44,21 @@ public class MainActivity extends Activity {
 	    try {
 			s.flush();
 		} catch (Exception e) {
-			hello.setText(e.toString());
 			e.printStackTrace();
 			return;
 		}
  
 	    
 	    for (String sms : messages) {
+	    	Log.i("Parsing", sms);
 	    	ParseResult r = p.parse(sms);
 	    	if (r.isSuccess()) {
 	    		Transaction t = r.getTransaction();
 	    		f.filter(t);
 	    		try {
 					s.add(t);
+					Log.i("dump", t.getPayee());
 				} catch (Exception e) {
-					hello.setText(e.toString());
 					e.printStackTrace();
 					return;
 				}
@@ -60,12 +66,13 @@ public class MainActivity extends Activity {
 	    		try {
 					s.failed(sms);
 				} catch (Exception e) {
-					hello.setText(e.toString());
 					e.printStackTrace();
 					return;
 				}
 	    	}
 	    }
+	    
+	    Log.i("parsing", "done");
 	    
 //	    YNABPastebinUploader u = new YNABPastebinUploader();
 //		try {
@@ -75,12 +82,62 @@ public class MainActivity extends Activity {
 //			e.printStackTrace();
 //		}
 	    try {
-			hello.setText(YNABCsvBuilder.listToCsv(s.get().transactions));
+	    	TransactionAdapter a = new TransactionAdapter(this, R.id.listView1, 
+	    			new ArrayList<Transaction>(s.get().transactions));
+	    	list.setAdapter(a);
 		} catch (Exception e) {
-			hello.setText(e.toString());
 			e.printStackTrace();
 			return;
 		}
+	}
+
+	private List<String> getHardcodedMessages() {
+		return Arrays.asList(
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; hülye payee; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
+			"ez meg eleve rossz"
+		);
+	}
+	
+	private List<String> getLastMonthsMessages() {
+        ArrayList<String> messages = new ArrayList<String>();
+
+    	Calendar monthAgo = Calendar.getInstance();
+    	monthAgo.add(Calendar.MONTH, -1);
+        
+        final String[] projection =
+                new String[] { "body" };
+        String selection = "address = ? AND date > ?";
+        String[] selectionArgs = new String[]{"+36309400700", Long.valueOf(monthAgo.getTimeInMillis()).toString()};
+        final String sortOrder = "date ASC";
+
+        // Create cursor
+        Cursor cursor = getContentResolver().query(
+                Uri.parse("content://sms/inbox"),
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder);
+
+        if (cursor != null) {
+            try {
+                int count = cursor.getCount();
+                if (count > 0) {
+                    while (cursor.moveToNext()) {
+                        messages.add(cursor.getString(0));
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return messages;
 	}
 
 	@Override

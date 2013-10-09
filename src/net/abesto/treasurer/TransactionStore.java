@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 
 public class TransactionStore {
 	public static class Data implements Serializable {
@@ -58,7 +59,9 @@ public class TransactionStore {
 	}
 	
 	public Data get() throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
-		return load();
+		Data d = load();
+		Log.i("dump", Integer.valueOf(d.transactions.size()).toString());
+		return d;
 	}
 	
 	public void flush() throws FileNotFoundException, IOException {

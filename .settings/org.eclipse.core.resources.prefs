@@ -1,3 +1,4 @@
 eclipse.preferences.version=1
 encoding//src/net/abesto/treasurer/MainActivity.java=UTF-8
+encoding//src/net/abesto/treasurer/filters/PayeeToCategoryFilter.java=UTF-8
 encoding//src/net/abesto/treasurer/parsers/OTPCreditCardUsageParser.java=UTF-8

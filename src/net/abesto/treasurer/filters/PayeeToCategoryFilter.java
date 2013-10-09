@@ -14,7 +14,10 @@ import android.util.Log;
 public class PayeeToCategoryFilter implements TransactionFilter {
 	private Map<String, List<String>> getMap() {
 		Map<String, List<String>> m = new HashMap<String, List<String>>();
-		m.put("Monthly Bills: BKV", new LinkedList<String>(Arrays.asList("b??rlet")));
+		m.put("Monthly Bills: BKV", new LinkedList<String>(Arrays.asList("bérlet")));
+		m.put("Everyday Expenses: Groceries", new LinkedList<String>(Arrays.asList("tesco")));
+		m.put("Everyday Expenses: Restaurants, Ordered food", new LinkedList<String>(Arrays.asList(
+				"étterem", "etterem")));
 		return m;
 	}
 
