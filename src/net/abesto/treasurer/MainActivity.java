@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
 				progressDialog.setMessage("Loading transactions from SMS messages in the last 30 days. Please wait...");
 				progressDialog.setIndeterminate(false);
 				progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+				progressDialog.setProgress(0);
 				progressDialog.show();
 			}			
 			
