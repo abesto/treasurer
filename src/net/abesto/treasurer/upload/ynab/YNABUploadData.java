@@ -39,7 +39,7 @@ public class YNABUploadData {
 		
 		yd.title = "Transaction report " + YNABDateFormatter.formatDate(earliest);
 		if (!earliest.equals(latest)) {
-			yd.title += "- " + YNABDateFormatter.formatDate(latest);
+			yd.title += " - " + YNABDateFormatter.formatDate(latest);
 		}
 		
 		yd.failedToParse = td.failedToParse;

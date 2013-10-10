@@ -1,6 +1,5 @@
 package net.abesto.treasurer;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,6 +30,17 @@ public class TransactionStore {
 	
 	public TransactionStore(Context context) {
 		this.context = context;
+		try {
+			context.openFileInput(FILE_NAME);
+		} catch (FileNotFoundException e) {
+			try {
+				flush();
+			} catch (Exception e1) {
+				throw new RuntimeException(e1);
+			}
+		} catch (Exception e1) {
+			throw new RuntimeException(e1);
+		}
 	}
 	
 	private void save(Data d) throws FileNotFoundException, IOException {
@@ -49,18 +59,20 @@ public class TransactionStore {
 	public void add(Transaction t) throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
 		Data d = load();
 		d.transactions.add(t);
+		Log.i("add", Integer.valueOf(d.transactions.size()).toString());
 		save(d);
 	}
 	
 	public void failed(String s) throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
 		Data d = load();
 		d.failedToParse.add(s);
+		Log.i("failed", Integer.valueOf(d.failedToParse.size()).toString());
 		save(d);
 	}
 	
 	public Data get() throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
 		Data d = load();
-		Log.i("dump", Integer.valueOf(d.transactions.size()).toString());
+		Log.i("get", Integer.valueOf(d.transactions.size()).toString());
 		return d;
 	}
 	

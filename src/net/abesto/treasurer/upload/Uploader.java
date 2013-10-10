@@ -8,7 +8,7 @@ public interface Uploader {
 		public UploadFailed(Exception e) 		{
 			super(e);
 		}
-	};
+	};	
 	
-	public String upload(TransactionStore.Data data) throws UploadFailed;
+	public String upload() throws UploadFailed;
 }

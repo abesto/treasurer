@@ -1,97 +1,150 @@
 package net.abesto.treasurer;
 
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StreamCorruptedException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 
-import net.abesto.treasurer.R;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.parsers.OTPCreditCardUsageParser;
 import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.SmsParser;
-import net.abesto.treasurer.upload.ynab.YNABCsvBuilder;
-import net.abesto.treasurer.upload.ynab.YNABPastebinUploader;
-import android.net.Uri;
-import android.os.Bundle;
+import net.abesto.treasurer.upload.Mailer;
+import net.abesto.treasurer.upload.MailerDataProvider;
+import net.abesto.treasurer.upload.PastebinUploader;
+import net.abesto.treasurer.upload.PastebinUploaderDataProvider;
+import net.abesto.treasurer.upload.UploadAsyncTask;
+import net.abesto.treasurer.upload.Uploader;
+import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
+import net.abesto.treasurer.upload.ynab.YNABPastebinUploaderDataProvider;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.database.Cursor;
-import android.telephony.SmsMessage;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.widget.ArrayAdapter;
+import android.view.View;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	private SmsParser parser = new OTPCreditCardUsageParser();
+	private TransactionFilter filter = new PayeeToCategoryFilter();
+	private TransactionStore store;
+	private TransactionAdapter adapter;
+	protected ProgressDialog progressDialog;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		ListView list = (ListView) findViewById(R.id.listView1);
+		progressDialog = new ProgressDialog(this);
+		
+		ListView list = (ListView) findViewById(R.id.transactionList);
+		store = new TransactionStore(this);
 
-		List<String> messages = getLastMonthsMessages();		
-				
-		SmsParser p = new OTPCreditCardUsageParser();
-	    TransactionFilter f = new PayeeToCategoryFilter();
-	    TransactionStore s = new TransactionStore(this);
 	    try {
-			s.flush();
+	        adapter = new TransactionAdapter(this, R.id.transactionList, 
+	    			new ArrayList<Transaction>(store.get().transactions));
+	    	list.setAdapter(adapter);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Log.e("init", "failed to create adapter");
+		}
+	}
+	
+	public void onLoadClicked(View v) {
+		AsyncTask<Void, Integer, List<Transaction>> loadTask = new AsyncTask<Void, Integer, List<Transaction>>(){			
+			@Override
+			protected void onPreExecute() {
+				progressDialog.setTitle("Loading transactions");
+				progressDialog.setMessage("Loading transactions from SMS messages in the last 30 days. Please wait...");
+				progressDialog.setIndeterminate(false);
+				progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+				progressDialog.show();
+			}			
+			
+			@Override
+			protected List<Transaction> doInBackground(Void... params) {
+				List<String> messages = loadLastMonthsMessages();
+				List<Transaction> transactions = new LinkedList<Transaction>();
+				progressDialog.setMax(messages.size());
+				for (String sms : messages) {
+					publishProgress(1);
+					Transaction t = handleMessage(sms);
+					if (t != null) {
+						transactions.add(t);
+					}
+				}
+				return transactions;						
+			}
+			
+			@Override
+			protected void onProgressUpdate(Integer... progress) {
+				if (progressDialog.isShowing()) {
+					for (Integer p : progress) {
+						progressDialog.incrementProgressBy(p);
+					}
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(List<Transaction> result) {
+				progressDialog.dismiss();
+				for (Transaction t : result) {
+					adapter.add(t);
+				}
+			}
+		};
+		loadTask.execute();
+	}
+	
+	public void onClearClicked(View v) {
+		try {
+			store.flush();
+			adapter.clear();
+		} catch (Exception e) { 
+			e.printStackTrace();
+		}			
+	}
+	
+	public void onSendClicked(View v) {
+		removeCacheFiles();
+		TransactionStore.Data data;
+		try {
+			data = store.get();
+		} catch (Exception e) {
+			SimpleAlertDialog.show(this, "Failed to load data", e.toString());
 			return;
 		}
- 
-	    
-	    for (String sms : messages) {
-	    	Log.i("Parsing", sms);
-	    	ParseResult r = p.parse(sms);
-	    	if (r.isSuccess()) {
-	    		Transaction t = r.getTransaction();
-	    		f.filter(t);
-	    		try {
-					s.add(t);
-					Log.i("dump", t.getPayee());
-				} catch (Exception e) {
-					e.printStackTrace();
-					return;
-				}
-	    	} else {
-	    		try {
-					s.failed(sms);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return;
-				}
-	    	}
-	    }
-	    
-	    Log.i("parsing", "done");
-	    
-//	    YNABPastebinUploader u = new YNABPastebinUploader();
-//		try {
-//			hello.setText(u.upload(s.get()));
-//		} catch (Exception e) {
-//			hello.setText(e.toString());
-//			e.printStackTrace();
-//		}
-	    try {
-	    	TransactionAdapter a = new TransactionAdapter(this, R.id.listView1, 
-	    			new ArrayList<Transaction>(s.get().transactions));
-	    	list.setAdapter(a);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
+		
+		MailerDataProvider dataProvider = new YNABMailerDataProvider(this, data);
+		Uploader uploader = new Mailer(this, dataProvider);
+//		PastebinUploaderDataProvider dataProvider = new YNABPastebinUploaderDataProvider(data);
+//		Uploader uploader = new PastebinUploader(dataProvider);
+		
+		UploadAsyncTask uploadTask = new UploadAsyncTask(this, uploader);
+		uploadTask.execute();
+	}
+
+	private void removeCacheFiles() {
+		// Some uploaders generate temporary files, but can't remove them for technical reasons.
+		// Removing them when the user hits send is a good bet:
+		// Earlier files are likely not needed anymore.
+		for (File f : getExternalCacheDir().listFiles()) {
+			f.delete();
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private List<String> getHardcodedMessages() {
+		// Used for manual testing
 		return Arrays.asList(
 			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
 			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
@@ -105,7 +158,29 @@ public class MainActivity extends Activity {
 		);
 	}
 	
-	private List<String> getLastMonthsMessages() {
+	private Transaction handleMessage(String sms) {
+    	Log.i("Parsing", sms);
+    	ParseResult r = parser.parse(sms);
+    	if (r.isSuccess()) {
+    		Transaction t = r.getTransaction();
+    		filter.filter(t);
+    		try {
+				store.add(t);
+				return t;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+    	} else {
+    		try {
+				store.failed(sms);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+    	}		
+    	return null;
+	}
+	
+	private List<String> loadLastMonthsMessages() {
         ArrayList<String> messages = new ArrayList<String>();
 
     	Calendar monthAgo = Calendar.getInstance();
@@ -146,49 +221,4 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-    
-//    private Boolean sendMail(TransactionStore store) {
-//        Properties props = new Properties();
-//		props.put("mail.smtp.auth", "true");
-//		props.put("mail.smtp.starttls.enable", "true");
-//		props.put("mail.smtp.host", "smtp.gmail.com");
-//		props.put("mail.smtp.port", "587");
-//		
-//        props.setProperty("mail.smtp.host", "smtp.gmail.com");
-//        
-//		Session session = Session.getInstance(props,
-//				  new javax.mail.Authenticator() {
-//					protected PasswordAuthentication getPasswordAuthentication() {
-//						return new PasswordAuthentication("abesto0@gmail.com", "password");
-//					}
-//				  });
-//
-//        try {
-//            Message msg = new MimeMessage(session);
-//            msg.setFrom(new InternetAddress("abesto0@gmail.com", "Treasurer"));
-//            msg.addRecipient(Message.RecipientType.TO,
-//                             new InternetAddress("abesto0@gmail.com", "Zolt??n Nagy"));
-//            msg.setSubject("Transaction report");
-//            msg.setSentDate(new Date());
-//
-//            BodyPart body = new MimeBodyPart();
-//            body.setText(text);
-//            
-//            BodyPart attachment = new MimeBodyPart();
-//            attachment.setFileName("transaction-20130101.csv");
-//            attachment.setText(text);
-//            
-//            Multipart multipart = new MimeMultipart();
-//            multipart.addBodyPart(body);
-//            multipart.addBodyPart(attachment);
-//            msg.setContent(multipart);
-//            
-//            Transport.send(msg);
-//        } catch (Exception e) {
-//        	// TODO report error
-//            e.printStackTrace();
-//        	return false;
-//		}
-//        return true;
-//    }
 }
