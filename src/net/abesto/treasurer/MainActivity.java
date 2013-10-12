@@ -5,9 +5,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import net.abesto.treasurer.SmsReceiver.Handler;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.parsers.OTPCreditCardUsageParser;
@@ -23,10 +26,15 @@ import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
 import net.abesto.treasurer.upload.ynab.YNABPastebinUploaderDataProvider;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -38,7 +46,11 @@ public class MainActivity extends Activity {
 	private TransactionFilter filter = new PayeeToCategoryFilter();
 	private TransactionStore store;
 	private TransactionAdapter adapter;
+	private SmsReceiver receiver;
 	protected ProgressDialog progressDialog;
+	
+	private final String otp = "+36309400700";
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +69,26 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 			Log.e("init", "failed to create adapter");
 		}
+	    
+	    Set<String> wantedSenders= new HashSet<String>();
+	    wantedSenders.add(otp);
+	    receiver = new SmsReceiver(wantedSenders, new SmsReceiver.Handler() {			
+			@Override
+			public void handle(String sms) {
+				adapter.add(handleMessage(sms));
+				
+			}
+		});
+	    IntentFilter filter = new IntentFilter();
+	    filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+	    registerReceiver(receiver, filter);
 	}
+	
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.unregisterReceiver(receiver);
+    }
 	
 	public void onLoadClicked(View v) {
 		AsyncTask<Void, Integer, List<Transaction>> loadTask = new AsyncTask<Void, Integer, List<Transaction>>(){			
@@ -190,7 +221,7 @@ public class MainActivity extends Activity {
         final String[] projection =
                 new String[] { "body" };
         String selection = "address = ? AND date > ?";
-        String[] selectionArgs = new String[]{"+36309400700", Long.valueOf(monthAgo.getTimeInMillis()).toString()};
+        String[] selectionArgs = new String[]{otp, Long.valueOf(monthAgo.getTimeInMillis()).toString()};
         final String sortOrder = "date ASC";
 
         // Create cursor

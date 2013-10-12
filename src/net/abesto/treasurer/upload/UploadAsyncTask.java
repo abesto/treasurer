@@ -1,8 +1,6 @@
 package net.abesto.treasurer.upload;
 
 import net.abesto.treasurer.SimpleAlertDialog;
-import net.abesto.treasurer.TransactionStore;
-import net.abesto.treasurer.TransactionStore.Data;
 import net.abesto.treasurer.upload.Uploader.UploadFailed;
 import android.app.ProgressDialog;
 import android.content.Context;
