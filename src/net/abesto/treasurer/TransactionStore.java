@@ -63,6 +63,12 @@ public class TransactionStore {
 		save(d);
 	}
 	
+	public void remove(Transaction t) throws IOException, ClassNotFoundException {
+		Data d = load();
+		d.transactions.remove(t);
+		save(d);
+	}
+	
 	public void failed(String s) throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
 		Data d = load();
 		d.failedToParse.add(s);

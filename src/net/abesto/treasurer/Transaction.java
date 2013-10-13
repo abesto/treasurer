@@ -51,4 +51,51 @@ public class Transaction implements Serializable {
 	public void setCategory(String category) {
 		this.category = category;
 	}	
+	
+	public String getFlow() {
+		if (inflow > 0) return inflow.toString();
+		return "-" + outflow.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Transaction other = (Transaction) obj;
+		if (category == null) {
+			if (other.category != null)
+				return false;
+		} else if (!category.equals(other.category))
+			return false;
+		if (date == null) {
+			if (other.date != null)
+				return false;
+		} else if (!date.equals(other.date))
+			return false;
+		if (inflow == null) {
+			if (other.inflow != null)
+				return false;
+		} else if (!inflow.equals(other.inflow))
+			return false;
+		if (memo == null) {
+			if (other.memo != null)
+				return false;
+		} else if (!memo.equals(other.memo))
+			return false;
+		if (outflow == null) {
+			if (other.outflow != null)
+				return false;
+		} else if (!outflow.equals(other.outflow))
+			return false;
+		if (payee == null) {
+			if (other.payee != null)
+				return false;
+		} else if (!payee.equals(other.payee))
+			return false;
+		return true;
+	}
 }
