@@ -28,9 +28,15 @@ import net.abesto.treasurer.upload.Uploader;
 import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
 import net.abesto.treasurer.upload.ynab.YNABPastebinUploaderDataProvider;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -45,6 +51,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.ListView;
 
 public class MainActivity extends Activity {
@@ -104,11 +111,36 @@ public class MainActivity extends Activity {
     }
 	
 	public void onLoadClicked(View v) {
-		AsyncTask<Void, Integer, List<Transaction>> loadTask = new AsyncTask<Void, Integer, List<Transaction>>(){			
+		Calendar monthAgo = Calendar.getInstance();
+		monthAgo.add(Calendar.MONTH, -1);
+		Dialog fromPicker = new DatePickerDialog(this, new OnDateSetListener() {			
+			@Override
+			public void onDateSet(DatePicker view, final int fromYear, final int fromMonthOfYear, final int fromDayOfMonth) {
+				Calendar today = Calendar.getInstance();
+				Dialog toPicker = new DatePickerDialog(MainActivity.this, new OnDateSetListener() {			
+					@Override
+					public void onDateSet(DatePicker view, int toYear, int toMonthOfYear, int toDayOfMonth) {
+						Calendar from = Calendar.getInstance();
+						from.set(fromYear, fromMonthOfYear, fromDayOfMonth);
+						Calendar to = Calendar.getInstance();
+						to.set(toYear, toMonthOfYear, toDayOfMonth);
+						onLoadDateRangeDlgLoadClicked(from, to);
+					}
+				}, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+				toPicker.setTitle("Load SMS messages up to");
+				toPicker.show();
+			}
+		}, monthAgo.get(Calendar.YEAR), monthAgo.get(Calendar.MONTH), monthAgo.get(Calendar.DAY_OF_MONTH));
+		fromPicker.setTitle("Load SMS messages from");
+		fromPicker.show();
+	}
+	
+	public void onLoadDateRangeDlgLoadClicked(final Calendar from, final Calendar to) {
+		AsyncTask<Calendar, Integer, List<Transaction>> loadTask = new AsyncTask<Calendar, Integer, List<Transaction>>(){			
 			@Override
 			protected void onPreExecute() {
 				progressDialog.setTitle("Loading transactions");
-				progressDialog.setMessage("Loading transactions from SMS messages in the last 30 days. Please wait...");
+				progressDialog.setMessage("Loading transactions from SMS messages. Please wait...");
 				progressDialog.setIndeterminate(false);
 				progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 				progressDialog.setProgress(0);
@@ -116,8 +148,8 @@ public class MainActivity extends Activity {
 			}			
 			
 			@Override
-			protected List<Transaction> doInBackground(Void... params) {
-				List<String> messages = loadLastMonthsMessages();
+			protected List<Transaction> doInBackground(Calendar... params) {
+				List<String> messages = loadMessagesBetween(from, to);
 				List<Transaction> transactions = new LinkedList<Transaction>();
 				progressDialog.setMax(messages.size());
 				for (String sms : messages) {
@@ -146,7 +178,7 @@ public class MainActivity extends Activity {
 					adapter.add(t);
 				}
 			}
-		};
+		};	
 		loadTask.execute();
 	}
 	
@@ -181,7 +213,9 @@ public class MainActivity extends Activity {
 	public void onReloadClicked(View v) {
 		adapter.clear();
 		try {
-			adapter.addAll(store.get().transactions);
+			for (Transaction t : store.get().transactions) {
+				adapter.add(t);
+			}
 		} catch (Exception e) {
 			SimpleAlertDialog.show(this, "Reload failed", e.toString());
 		}
@@ -262,16 +296,15 @@ public class MainActivity extends Activity {
     	return null;
 	}
 	
-	private List<String> loadLastMonthsMessages() {
+	private List<String> loadMessagesBetween(Calendar from, Calendar to) {
         ArrayList<String> messages = new ArrayList<String>();
-
-    	Calendar monthAgo = Calendar.getInstance();
-    	monthAgo.add(Calendar.MONTH, -1);
         
         final String[] projection =
                 new String[] { "body" };
-        String selection = "address = ? AND date > ?";
-        String[] selectionArgs = new String[]{otp, Long.valueOf(monthAgo.getTimeInMillis()).toString()};
+        String selection = "address = ? AND date > ? AND date < ?";
+        String[] selectionArgs = new String[]{otp, 
+        		Long.valueOf(from.getTimeInMillis()).toString(),
+        		Long.valueOf(to.getTimeInMillis()).toString()};
         final String sortOrder = "date ASC";
 
         // Create cursor
