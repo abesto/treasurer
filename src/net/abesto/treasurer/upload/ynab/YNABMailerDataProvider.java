@@ -1,18 +1,17 @@
 package net.abesto.treasurer.upload.ynab;
 
 import android.content.Context;
-import net.abesto.treasurer.TransactionStore;
 import net.abesto.treasurer.upload.MailerDataProvider;
+import net.abesto.treasurer.upload.UploadData;
 
-public class YNABMailerDataProvider implements MailerDataProvider {
-	private Context context;
+public class YNABMailerDataProvider extends MailerDataProvider {
 	private YNABUploadData data;
 	
-	public YNABMailerDataProvider(Context context, TransactionStore.Data data) {
-		this.context = context;
-		this.data = YNABUploadData.fromTransactionStoreData(data);
+	public YNABMailerDataProvider(Context context, UploadData uploadData) {
+		super(context, uploadData);
+		data = YNABUploadData.fromUploadData(uploadData);
 	}
-	
+
 	@Override
 	public String getTitle() {
 		return data.title;

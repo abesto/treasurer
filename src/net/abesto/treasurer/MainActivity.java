@@ -2,9 +2,6 @@ package net.abesto.treasurer;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -13,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.abesto.treasurer.SmsReceiver.Handler;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.parsers.OTPCreditCardUsageParser;
@@ -21,29 +17,19 @@ import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.SmsParser;
 import net.abesto.treasurer.upload.Mailer;
 import net.abesto.treasurer.upload.MailerDataProvider;
-import net.abesto.treasurer.upload.PastebinUploader;
-import net.abesto.treasurer.upload.PastebinUploaderDataProvider;
 import net.abesto.treasurer.upload.UploadAsyncTask;
-import net.abesto.treasurer.upload.Uploader;
+import net.abesto.treasurer.upload.UploadData;
 import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
-import net.abesto.treasurer.upload.ynab.YNABPastebinUploaderDataProvider;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -58,7 +44,8 @@ public class MainActivity extends Activity {
 
 	private SmsParser parser = new OTPCreditCardUsageParser();
 	private TransactionFilter filter = new PayeeToCategoryFilter();
-	private TransactionStore store;
+	private Store<Transaction> transactionStore;
+	private Store<String> failedToParseStore;
 	private TransactionAdapter adapter;
 	private SmsReceiver receiver;
 	private ListView transactionList;
@@ -75,11 +62,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		progressDialog = new ProgressDialog(this);		
 		transactionList = (ListView) findViewById(R.id.transactionList);
-		store = new TransactionStore(this);
+		transactionStore = new Store<Transaction>(this, Transaction.class);
+		failedToParseStore = new Store<String>(this, String.class);
 
 	    try {
 	        adapter = new TransactionAdapter(this, R.id.transactionList, 
-	    			new ArrayList<Transaction>(store.get().transactions));
+	    			new ArrayList<Transaction>(transactionStore.get()));
 	    	transactionList.setAdapter(adapter);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -184,7 +172,8 @@ public class MainActivity extends Activity {
 	
 	public void onClearClicked(View v) {
 		try {
-			store.flush();
+			transactionStore.flush();
+			failedToParseStore.flush();
 			adapter.clear();
 		} catch (Exception e) { 
 			e.printStackTrace();
@@ -193,27 +182,27 @@ public class MainActivity extends Activity {
 	
 	public void onSendClicked(View v) {
 		removeCacheFiles();
-		TransactionStore.Data data;
+		UploadData data;
 		try {
-			data = store.get();
+			data = UploadData.fromStore(this);
 		} catch (Exception e) {
 			SimpleAlertDialog.show(this, "Failed to load data", e.toString());
 			return;
 		}
 		
 		MailerDataProvider dataProvider = new YNABMailerDataProvider(this, data);
-		Uploader uploader = new Mailer(this, dataProvider);
-//		PastebinUploaderDataProvider dataProvider = new YNABPastebinUploaderDataProvider(data);
+		Mailer uploader = new Mailer(dataProvider);		
+//		PastebinUploaderDataProvider dataProvider = new YNABPastebinUploaderDataProvider(this, data);
 //		Uploader uploader = new PastebinUploader(dataProvider);
 		
-		UploadAsyncTask uploadTask = new UploadAsyncTask(this, uploader);
+		UploadAsyncTask<Mailer> uploadTask = new UploadAsyncTask<Mailer>(this, uploader);
 		uploadTask.execute();
 	}
 	
 	public void onReloadClicked(View v) {
 		adapter.clear();
 		try {
-			for (Transaction t : store.get().transactions) {
+			for (Transaction t : transactionStore.get()) {
 				adapter.add(t);
 			}
 		} catch (Exception e) {
@@ -239,7 +228,7 @@ public class MainActivity extends Activity {
 	  if (menuItemIndex == 0) {
 		  Transaction t = adapter.getItem(info.position);
 		  try {
-			store.remove(t);
+			transactionStore.remove(t);
 			adapter.remove(t);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -281,14 +270,14 @@ public class MainActivity extends Activity {
     		Transaction t = r.getTransaction();
     		filter.filter(t);
     		try {
-				store.add(t);
+				transactionStore.add(t);
 				return t;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
     	} else {
     		try {
-				store.failed(sms);
+				failedToParseStore.add(sms);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

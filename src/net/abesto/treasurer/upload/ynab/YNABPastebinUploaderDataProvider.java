@@ -1,17 +1,17 @@
 package net.abesto.treasurer.upload.ynab;
 
-import net.abesto.treasurer.TransactionStore;
+import android.content.Context;
 import net.abesto.treasurer.upload.PastebinUploaderDataProvider;
+import net.abesto.treasurer.upload.UploadData;
 
-public class YNABPastebinUploaderDataProvider implements
-		PastebinUploaderDataProvider {
-	
+public class YNABPastebinUploaderDataProvider extends PastebinUploaderDataProvider {
 	private YNABUploadData data;
 	
-	public YNABPastebinUploaderDataProvider(TransactionStore.Data data) {
-		this.data = YNABUploadData.fromTransactionStoreData(data);
+	public YNABPastebinUploaderDataProvider(Context context, UploadData uploadData) {
+		super(context, uploadData);
+		data = YNABUploadData.fromUploadData(uploadData);
 	}
-
+	
 	@Override
 	public String getRawData() {
 		return YNABStringBuilder.toCsv(data);

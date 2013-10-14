@@ -1,9 +1,6 @@
 package net.abesto.treasurer;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import net.abesto.treasurer.SmsReceiver.Handler;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

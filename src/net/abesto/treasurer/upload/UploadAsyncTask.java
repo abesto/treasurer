@@ -7,14 +7,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Pair;
 
-public class UploadAsyncTask extends
+public class UploadAsyncTask<U extends Uploader<?>> extends
 		AsyncTask<Void, Void, Pair<String, String>> {
 	
 	private Context context;
-	private Uploader uploader;
+	private U uploader;
 	private ProgressDialog progressDialog;
 	
-	public UploadAsyncTask(Context context, Uploader uploader) {
+	public UploadAsyncTask(Context context, U uploader) {
 		this.context = context;
 		this.uploader = uploader;
 	}

@@ -11,14 +11,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 
-public class PastebinUploader implements Uploader {
+public class PastebinUploader extends Uploader<PastebinUploaderDataProvider> {
+	public PastebinUploader(PastebinUploaderDataProvider dataProvider) {
+		super(dataProvider);
+	}
+
 	private PastebinUploaderDataProvider dataProvider;
 	private DefaultHttpClient http = new DefaultHttpClient();
 	private String apiKey = "44ad5ad2f24bca7151918c453be5b8c1";
-	
-	public PastebinUploader(PastebinUploaderDataProvider dataProvider) {
-		this.dataProvider = dataProvider;
-	}
 	
 	private String post(String text) throws UploadFailed {
 		HttpPost post = new HttpPost("http://pastebin.com/api/api_post.php");

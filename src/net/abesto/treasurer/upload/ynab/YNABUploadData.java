@@ -5,7 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.abesto.treasurer.Transaction;
-import net.abesto.treasurer.TransactionStore;
+import net.abesto.treasurer.upload.UploadData;
+
 
 public class YNABUploadData {
 	public String title;
@@ -19,15 +20,16 @@ public class YNABUploadData {
 		failedToParse = new LinkedList<String>();
 	}
 	
-	public static YNABUploadData fromTransactionStoreData(TransactionStore.Data td) {
-		YNABUploadData yd = new YNABUploadData();
+	public YNABUploadData(List<Transaction> transactions, List<String> failedToParse) {
+		this();
+		
 		Date earliest = null, latest = null;
 		
-		for (Transaction t : td.transactions) {
+		for (Transaction t : transactions) {
 			if (t.getCategory().length() == 0) {
-				yd.noCategoryTransactions.add(t);
+				this.noCategoryTransactions.add(t);
 			} else {
-				yd.goodTransactions.add(t);
+				this.goodTransactions.add(t);
 			}
 			if (earliest == null || earliest.compareTo(t.getDate()) > 0) {
 				earliest = t.getDate();
@@ -37,13 +39,15 @@ public class YNABUploadData {
 			}
 		}
 		
-		yd.title = "Transaction report " + YNABDateFormatter.formatDate(earliest);
+		this.title = "Transaction report " + YNABDateFormatter.formatDate(earliest);
 		if (!earliest.equals(latest)) {
-			yd.title += " - " + YNABDateFormatter.formatDate(latest);
+			this.title += " - " + YNABDateFormatter.formatDate(latest);
 		}
 		
-		yd.failedToParse = td.failedToParse;
-		
-		return yd;
+		this.failedToParse = failedToParse;
+	}
+	
+	public static YNABUploadData fromUploadData(UploadData uploadData) {
+		return new YNABUploadData(uploadData.getTransactions(), uploadData.getFailedToParse());
 	}
 }

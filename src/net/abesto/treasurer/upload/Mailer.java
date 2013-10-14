@@ -6,19 +6,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import net.abesto.treasurer.upload.Uploader;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-public class Mailer implements Uploader {
-	private Context context;
-	private MailerDataProvider dataProvider;
-	
-	public Mailer(Context context, MailerDataProvider dataProvider) {
-		this.context = context;
-		this.dataProvider = dataProvider;
+public class Mailer extends Uploader<MailerDataProvider> {
+	public Mailer(MailerDataProvider dataProvider) {
+		super(dataProvider);
 	}
-	
+
 	@Override
 	public String upload() throws UploadFailed {
 		Intent i = new Intent(Intent.ACTION_SEND);
@@ -35,12 +30,13 @@ public class Mailer implements Uploader {
 		i.putExtra(Intent.EXTRA_SUBJECT, dataProvider.getTitle());
 		i.putExtra(Intent.EXTRA_TEXT, dataProvider.getBody());
 		i.putExtra(Intent.EXTRA_STREAM, attachmentUri);
-		context.startActivity(Intent.createChooser(i, "Send transaction report"));
+		dataProvider.getContext().startActivity(Intent.createChooser(i, "Send transaction report"));
 		return null;
 	}
 
 	private Uri writeAttachmentFile() throws IOException {
-		File file = new File(context.getExternalCacheDir(), dataProvider.getAttachmentFilename());
+		File file = new File(dataProvider.getContext().getExternalCacheDir(),
+							 dataProvider.getAttachmentFilename());
 		FileOutputStream stream = new FileOutputStream(file);
 		OutputStreamWriter writer = new OutputStreamWriter(stream);
 		writer.write(dataProvider.getAttachmentText());		

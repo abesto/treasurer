@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.abesto.treasurer.Transaction;
-import net.abesto.treasurer.TransactionStore;
 import net.abesto.treasurer.upload.ynab.YNABUploadData;
 
 public class YNABStringBuilder {

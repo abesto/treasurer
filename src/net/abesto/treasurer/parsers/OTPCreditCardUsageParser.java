@@ -4,8 +4,6 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.util.Log;
-
 import net.abesto.treasurer.Transaction;
 
 public class OTPCreditCardUsageParser implements SmsParser {
