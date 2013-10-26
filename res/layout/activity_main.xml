@@ -8,35 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/send_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:onClick="onSendClicked"
-        android:text="Send" />
-
-    <Button
-        android:id="@+id/clear_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/send_btn"
-        android:layout_alignBottom="@+id/send_btn"
-        android:layout_toRightOf="@+id/send_btn"
-        android:onClick="onClearClicked"
-        android:text="Clear" />
-    
-    
-    <Button
-        android:id="@+id/load_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/transactionList"
-        android:layout_toRightOf="@+id/clear_btn"
-        android:onClick="onLoadClicked"
-        android:text="Load" />
-
     <ListView
         android:id="@+id/transactionList"
         android:layout_width="match_parent"
@@ -44,15 +15,4 @@
         android:layout_above="@+id/send_btn"
         android:layout_alignParentLeft="true" >
     </ListView>
-
-    <Button
-        android:id="@+id/reloadBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/load_btn"
-        android:layout_alignBottom="@+id/load_btn"
-        android:layout_toRightOf="@+id/load_btn"
-        android:text="Reload"
-        android:onClick="onReloadClicked" />
-
 </RelativeLayout>

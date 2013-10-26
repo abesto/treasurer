@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
         this.unregisterReceiver(receiver);
     }
 	
-	public void onLoadClicked(@SuppressWarnings("UnusedParameters") View v) {
+	public void onLoadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
         Intent intent = new Intent(this, LoadActivity.class);
         startActivityForResult(intent, REQUEST_CODE_LOAD);
 	}
@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void onClearClicked(@SuppressWarnings("UnusedParameters") View v) {
+    public void onClearClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
 		try {
 			transactionStore.flush();
 			failedToParseStore.flush();
@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
 		}			
 	}
 	
-	public void onSendClicked(@SuppressWarnings("UnusedParameters") View v) {
+	public void onSendClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
 		removeCacheFiles();
 		UploadData data;
 		try {
@@ -123,7 +123,11 @@ public class MainActivity extends Activity {
 			SimpleAlertDialog.show(this, "Failed to load data", e.toString());
 			return;
 		}
-		
+
+        if (data.getTransactions().size() == 0) {
+            Log.i("onSendClicked", "Ignoring send, no transactions");
+            return;
+        }
 		MailerDataProvider dataProvider = new YNABMailerDataProvider(this, data);
 		Mailer uploader = new Mailer(dataProvider);		
 //		PastebinUploaderDataProvider dataProvider = new YNABPastebinUploaderDataProvider(this, data);
@@ -144,7 +148,7 @@ public class MainActivity extends Activity {
         }
     }
 	
-	public void onReloadClicked(@SuppressWarnings("UnusedParameters") View v) {
+	public void onReloadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
         repopulateFromStore();
 	}
 

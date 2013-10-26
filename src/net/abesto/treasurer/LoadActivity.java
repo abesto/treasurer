@@ -36,15 +36,15 @@ public class LoadActivity extends Activity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading transactions");
         progressDialog.setMessage("Loading transactions from SMS messages. Please wait...");
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
         Calendar cal = Calendar.getInstance();
         updateDatePickerWithCalendar(R.id.date_from, cal);
         cal.add(Calendar.MONTH, -1);
         updateDatePickerWithCalendar(R.id.date_until, cal);
-    }
-
-    public void onCancelClicked(@SuppressWarnings("UnusedParameters") View v) {
-        finish();
     }
 
     private Calendar getCalendarFromDatePicker(int id) {
@@ -52,6 +52,10 @@ public class LoadActivity extends Activity {
         Calendar calendar = Calendar.getInstance();
         calendar.set(picker.getYear(), picker.getMonth(), picker.getDayOfMonth());
         return calendar;
+    }
+
+    public void onCancelClicked(@SuppressWarnings("UnusedParameters") View v) {
+        finish();
     }
 
     private void updateDatePickerWithCalendar(int id, Calendar cal) {
