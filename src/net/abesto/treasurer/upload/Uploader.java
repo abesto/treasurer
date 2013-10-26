@@ -6,7 +6,7 @@ abstract class Uploader<DP extends DataProvider> {
 		public UploadFailed(Exception e) 		{
 			super(e);
 		}
-	};	
+	}
 	
 	protected DP dataProvider;
 	

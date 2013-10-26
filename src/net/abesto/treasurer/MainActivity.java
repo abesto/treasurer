@@ -14,11 +14,7 @@ import android.widget.AdapterView;
 import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserStoreAdapter;
-import net.abesto.treasurer.upload.Mailer;
-import net.abesto.treasurer.upload.MailerDataProvider;
-import net.abesto.treasurer.upload.UploadAsyncTask;
-import net.abesto.treasurer.upload.UploadData;
-import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
+import net.abesto.treasurer.upload.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +37,7 @@ public class MainActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         initializeStores();
+        UploaderFactory.initializeComponent(this);
         initializeListAdapter();
         initializeParser();
         registerSmsListener();
@@ -169,12 +166,10 @@ public class MainActivity extends ListActivity {
             Log.i("onSendClicked", "Ignoring send, no transactions");
             return;
         }
-        MailerDataProvider dataProvider = new YNABMailerDataProvider(this, data);
-        Mailer uploader = new Mailer(dataProvider);
-//		PastebinUploaderDataProvider dataProvider = new YNABPastebinUploaderDataProvider(this, data);
-//		Uploader uploader = new PastebinUploader(dataProvider);
-		
-        UploadAsyncTask<Mailer> uploadTask = new UploadAsyncTask<Mailer>(this, uploader);
+
+        UploadAsyncTask uploadTask = new UploadAsyncTask(this, UploaderFactory.getInstance().build(
+                UploaderFactory.UploaderFormat.YNAB, UploaderFactory.UploaderType.MAIL, data
+        ));
         uploadTask.execute();
     }
 
