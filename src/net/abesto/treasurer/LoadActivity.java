@@ -42,9 +42,9 @@ public class LoadActivity extends Activity {
     public void onStart() {
         super.onStart();
         Calendar cal = Calendar.getInstance();
-        updateDatePickerWithCalendar(R.id.date_from, cal);
-        cal.add(Calendar.MONTH, -1);
         updateDatePickerWithCalendar(R.id.date_until, cal);
+        cal.add(Calendar.MONTH, -1);
+        updateDatePickerWithCalendar(R.id.date_from, cal);
     }
 
     private Calendar getCalendarFromDatePicker(int id) {

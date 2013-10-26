@@ -6,12 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.filters.TransactionFilter;
@@ -37,7 +33,6 @@ public class MainActivity extends Activity {
 	private Store<String> failedToParseStore;
 	private TransactionAdapter adapter;
 	private SmsReceiver receiver;
-	private ListView transactionList;
     private static final String otp = "+36309400700";
 
     private static final int REQUEST_CODE_LOAD = 1;
@@ -48,7 +43,7 @@ public class MainActivity extends Activity {
 		
 		// UI components
 		setContentView(R.layout.activity_main);
-		transactionList = (ListView) findViewById(R.id.transactionList);
+        ListView transactionList = (ListView) findViewById(R.id.transactionList);
 
         StoreFactory.initializeComponent(this);
         StoreFactory storeFactory = StoreFactory.getInstance();
@@ -78,9 +73,6 @@ public class MainActivity extends Activity {
 	    IntentFilter filter = new IntentFilter();
 	    filter.addAction("android.provider.Telephony.SMS_RECEIVED");
 	    registerReceiver(receiver, filter);
-	    
-	    // List item long click
-	    registerForContextMenu(transactionList);
 	}
 	
     @Override
@@ -152,34 +144,6 @@ public class MainActivity extends Activity {
         repopulateFromStore();
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-	  if (v == transactionList) {
-	    AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-	    Transaction t = adapter.getItem(info.position);
-	    menu.setHeaderTitle(t.getFlow() + " " + t.getCategory() + " " + t.getDate());
-	    menu.add(Menu.NONE, 0, 0, "Delete");
-	    menu.add(Menu.NONE, 1, 1, "Cancel");
-	  }
-	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-	  AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-	  int menuItemIndex = item.getItemId();
-	  if (menuItemIndex == 0) {
-		  Transaction t = adapter.getItem(info.position);
-		  try {
-			transactionStore.remove(t);
-			adapter.remove(t);
-		} catch (Exception e) {
-			e.printStackTrace();
-			SimpleAlertDialog.show(this, "Failed to remove transaction", e.toString());
-		}
-	  }
-	  return true;
-	}
-	
 	private void removeCacheFiles() {
 		// Some uploaders generate temporary files, but can't remove them for technical reasons.
 		// Removing them when the user hits send is a good bet:
