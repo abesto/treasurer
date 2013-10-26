@@ -1,43 +1,18 @@
 package net.abesto.treasurer;
 
-import java.util.ArrayList;
-
 import android.content.Context;
-import android.view.*;
-import android.widget.AdapterView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 
 public class TransactionAdapter extends ArrayAdapter<Transaction> {
 
     private Context context;
-    private View.OnCreateContextMenuListener createListItemContextMenu = new View.OnCreateContextMenuListener() {
-        @Override
-        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) contextMenuInfo;
-            Transaction t = getItem(info.position);
-            contextMenu.setHeaderTitle(t.getFlow() + " " + t.getCategory() + " " + t.getDate());
-            contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
-            contextMenu.add(Menu.NONE, 1, 1, "Cancel");
-        }
-    };
-
-    private MenuItem.OnMenuItemClickListener deleteClicked = new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem menuItem) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-            Transaction t = getItem(info.position);
-            try {
-                StoreFactory.getInstance().transactionStore().remove(t);
-                remove(t);
-            } catch (Exception e) {
-                e.printStackTrace();
-                SimpleAlertDialog.show(context, "Failed to remove transaction", e.toString());
-            }
-            return true;
-        }
-    };
 
     public TransactionAdapter(Context context, int resourceId, ArrayList<Transaction> items) {
         super(context, resourceId, items);
@@ -45,8 +20,6 @@ public class TransactionAdapter extends ArrayAdapter<Transaction> {
     }
 
     public View getView(int position, View view, ViewGroup parent) {
-        parent.setOnCreateContextMenuListener(createListItemContextMenu);
-
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.transaction_list_item, null);

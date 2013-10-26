@@ -10,6 +10,6 @@ public class CategoryListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		// UI components
-		setContentView(R.layout.activity_main);
+		//setContentView(R.layout.activity_main);
 	}
 }
