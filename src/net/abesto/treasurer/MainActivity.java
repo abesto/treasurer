@@ -1,15 +1,18 @@
 package net.abesto.treasurer;
 
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.parsers.OTPCreditCardUsageParser;
@@ -20,25 +23,11 @@ import net.abesto.treasurer.upload.MailerDataProvider;
 import net.abesto.treasurer.upload.UploadAsyncTask;
 import net.abesto.treasurer.upload.UploadData;
 import net.abesto.treasurer.upload.ynab.YNABMailerDataProvider;
-import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.DatePickerDialog.OnDateSetListener;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.IntentFilter;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.DatePicker;
-import android.widget.ListView;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends Activity {
 
@@ -49,25 +38,27 @@ public class MainActivity extends Activity {
 	private TransactionAdapter adapter;
 	private SmsReceiver receiver;
 	private ListView transactionList;
-	protected ProgressDialog progressDialog;
-	
-	private final String otp = "+36309400700";
+    private static final String otp = "+36309400700";
 
-	
+    private static final int REQUEST_CODE_LOAD = 1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		// UI components
 		setContentView(R.layout.activity_main);
-		progressDialog = new ProgressDialog(this);		
 		transactionList = (ListView) findViewById(R.id.transactionList);
-		transactionStore = new Store<Transaction>(this, Transaction.class);
-		failedToParseStore = new Store<String>(this, String.class);
+
+        StoreFactory.initializeComponent(this);
+        StoreFactory storeFactory = StoreFactory.getInstance();
+		transactionStore = storeFactory.transactionStore();
+		failedToParseStore = storeFactory.failedToParseStore();
 
 	    try {
-	        adapter = new TransactionAdapter(this, R.id.transactionList, 
-	    			new ArrayList<Transaction>(transactionStore.get()));
+	        adapter = new TransactionAdapter(
+                    this, R.id.transactionList,
+                    new ArrayList<Transaction>(transactionStore.get()));
 	    	transactionList.setAdapter(adapter);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -98,79 +89,22 @@ public class MainActivity extends Activity {
         this.unregisterReceiver(receiver);
     }
 	
-	public void onLoadClicked(View v) {
-		Calendar monthAgo = Calendar.getInstance();
-		monthAgo.add(Calendar.MONTH, -1);
-		Dialog fromPicker = new DatePickerDialog(this, new OnDateSetListener() {			
-			@Override
-			public void onDateSet(DatePicker view, final int fromYear, final int fromMonthOfYear, final int fromDayOfMonth) {
-				Calendar today = Calendar.getInstance();
-				Dialog toPicker = new DatePickerDialog(MainActivity.this, new OnDateSetListener() {			
-					@Override
-					public void onDateSet(DatePicker view, int toYear, int toMonthOfYear, int toDayOfMonth) {
-						Calendar from = Calendar.getInstance();
-						from.set(fromYear, fromMonthOfYear, fromDayOfMonth);
-						Calendar to = Calendar.getInstance();
-						to.set(toYear, toMonthOfYear, toDayOfMonth);
-						onLoadDateRangeDlgLoadClicked(from, to);
-					}
-				}, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
-				toPicker.setTitle("Load SMS messages up to");
-				toPicker.show();
-			}
-		}, monthAgo.get(Calendar.YEAR), monthAgo.get(Calendar.MONTH), monthAgo.get(Calendar.DAY_OF_MONTH));
-		fromPicker.setTitle("Load SMS messages from");
-		fromPicker.show();
+	public void onLoadClicked(@SuppressWarnings("UnusedParameters") View v) {
+        Intent intent = new Intent(this, LoadActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_LOAD);
 	}
-	
-	public void onLoadDateRangeDlgLoadClicked(final Calendar from, final Calendar to) {
-		AsyncTask<Calendar, Integer, List<Transaction>> loadTask = new AsyncTask<Calendar, Integer, List<Transaction>>(){			
-			@Override
-			protected void onPreExecute() {
-				progressDialog.setTitle("Loading transactions");
-				progressDialog.setMessage("Loading transactions from SMS messages. Please wait...");
-				progressDialog.setIndeterminate(false);
-				progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-				progressDialog.setProgress(0);
-				progressDialog.show();
-			}			
-			
-			@Override
-			protected List<Transaction> doInBackground(Calendar... params) {
-				List<String> messages = loadMessagesBetween(from, to);
-				List<Transaction> transactions = new LinkedList<Transaction>();
-				progressDialog.setMax(messages.size());
-				for (String sms : messages) {
-					publishProgress(1);
-					Transaction t = handleMessage(sms);
-					if (t != null) {
-						transactions.add(t);
-					}
-				}
-				return transactions;						
-			}
-			
-			@Override
-			protected void onProgressUpdate(Integer... progress) {
-				if (progressDialog.isShowing()) {
-					for (Integer p : progress) {
-						progressDialog.incrementProgressBy(p);
-					}
-				}
-			}
-			
-			@Override
-			protected void onPostExecute(List<Transaction> result) {
-				progressDialog.dismiss();
-				for (Transaction t : result) {
-					adapter.add(t);
-				}
-			}
-		};	
-		loadTask.execute();
-	}
-	
-	public void onClearClicked(View v) {
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_CODE_LOAD:
+                repopulateFromStore();
+                break;
+            default:
+                Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);
+        }
+    }
+
+    public void onClearClicked(@SuppressWarnings("UnusedParameters") View v) {
 		try {
 			transactionStore.flush();
 			failedToParseStore.flush();
@@ -180,7 +114,7 @@ public class MainActivity extends Activity {
 		}			
 	}
 	
-	public void onSendClicked(View v) {
+	public void onSendClicked(@SuppressWarnings("UnusedParameters") View v) {
 		removeCacheFiles();
 		UploadData data;
 		try {
@@ -198,16 +132,20 @@ public class MainActivity extends Activity {
 		UploadAsyncTask<Mailer> uploadTask = new UploadAsyncTask<Mailer>(this, uploader);
 		uploadTask.execute();
 	}
+
+    private void repopulateFromStore() {
+        adapter.clear();
+        try {
+            for (Transaction t : transactionStore.get()) {
+                adapter.add(t);
+            }
+        } catch (Exception e) {
+            SimpleAlertDialog.show(this, "Reload failed", e.toString());
+        }
+    }
 	
-	public void onReloadClicked(View v) {
-		adapter.clear();
-		try {
-			for (Transaction t : transactionStore.get()) {
-				adapter.add(t);
-			}
-		} catch (Exception e) {
-			SimpleAlertDialog.show(this, "Reload failed", e.toString());
-		}
+	public void onReloadClicked(@SuppressWarnings("UnusedParameters") View v) {
+        repopulateFromStore();
 	}
 
 	@Override
@@ -243,28 +181,13 @@ public class MainActivity extends Activity {
 		// Removing them when the user hits send is a good bet:
 		// Earlier files are likely not needed anymore.
 		for (File f : getExternalCacheDir().listFiles()) {
-			f.delete();
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private List<String> getHardcodedMessages() {
-		// Used for manual testing
-		return Arrays.asList(
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; jegy-és bérletpánzt, budapest nyugati pu.metro; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"131006 21:19 kártyás vásárlás/zárolás: -3.850 huf; hülye payee; kártyaszám: ...5918; egyenleg: 111.111 huf - otpdirekt",
-			"ez meg eleve rossz"
-		);
+            if (!f.delete()) {
+                Log.w("removeCacheFiles", "Failed to delete " + f.getName());
+            }
+        }
 	}
 	
 	private Transaction handleMessage(String sms) {
-    	Log.i("Parsing", sms);
     	ParseResult r = parser.parse(sms);
     	if (r.isSuccess()) {
     		Transaction t = r.getTransaction();
@@ -285,39 +208,6 @@ public class MainActivity extends Activity {
     	return null;
 	}
 	
-	private List<String> loadMessagesBetween(Calendar from, Calendar to) {
-        ArrayList<String> messages = new ArrayList<String>();
-        
-        final String[] projection =
-                new String[] { "body" };
-        String selection = "address = ? AND date > ? AND date < ?";
-        String[] selectionArgs = new String[]{otp, 
-        		Long.valueOf(from.getTimeInMillis()).toString(),
-        		Long.valueOf(to.getTimeInMillis()).toString()};
-        final String sortOrder = "date ASC";
-
-        // Create cursor
-        Cursor cursor = getContentResolver().query(
-                Uri.parse("content://sms/inbox"),
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder);
-
-        if (cursor != null) {
-            try {
-                int count = cursor.getCount();
-                if (count > 0) {
-                    while (cursor.moveToNext()) {
-                        messages.add(cursor.getString(0));
-                    }
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return messages;
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
