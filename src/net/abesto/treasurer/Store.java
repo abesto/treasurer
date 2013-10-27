@@ -6,22 +6,20 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 
 public class Store<Data extends Serializable> {
+    private static Map<String, Store> instanceMap = new HashMap<String, Store>();
+
 	private String fileName;
+	private static Context context;
 	
-	private Context context;
-	
-	public Store(Context context, Class<?> cls) {
-		this(context, cls.getSimpleName());
-	}
-	
-	public Store(Context context, String id) {
-		this.context = context;
+	private Store(String id) {
 		this.fileName = id + ".dat";
 		try {
 			context.openFileInput(fileName);
@@ -35,7 +33,23 @@ public class Store<Data extends Serializable> {
 			throw new RuntimeException(e1);
 		}
 	}
-	
+
+    public static void initializeComponent(Context _context) {
+        context = _context;
+    }
+
+    public static <D extends Serializable> Store<D> getInstance(Class<D> cls) {
+        return getInstance(cls.getSimpleName());
+    }
+
+    public static <D extends Serializable> Store<D> getInstance(String id) {
+        if (!instanceMap.containsKey(id)) {
+            instanceMap.put(id, new Store<D>(id));
+        }
+        //noinspection unchecked
+        return (Store<D>) instanceMap.get(id);
+    }
+
 	private void save(List<Data> d) throws FileNotFoundException, IOException {
 		ObjectOutputStream out = new ObjectOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE));
 		out.writeObject(d);
@@ -66,4 +80,7 @@ public class Store<Data extends Serializable> {
 		save(new LinkedList<Data>());
 	}
 
+    public String getFileName() {
+        return fileName;
+    }
 }

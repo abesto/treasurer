@@ -81,7 +81,7 @@ public class MainActivity extends ListActivity {
     }
 
     private void initializeStores() {
-        StoreFactory.initializeComponent(this);
+        Store.initializeComponent(this);
         StoreFactory storeFactory = StoreFactory.getInstance();
         transactionStore = storeFactory.transactionStore();
         failedToParseStore = storeFactory.failedToParseStore();
@@ -156,7 +156,7 @@ public class MainActivity extends ListActivity {
         removeCacheFiles();
         UploadData data;
         try {
-            data = UploadData.fromStore(this);
+            data = UploadData.fromStore();
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Failed to load data", e.toString());
             return;

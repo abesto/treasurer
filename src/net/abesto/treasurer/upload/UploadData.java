@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 
 import net.abesto.treasurer.Store;
+import net.abesto.treasurer.StoreFactory;
 import net.abesto.treasurer.Transaction;
 
 public class UploadData {
@@ -24,10 +25,10 @@ public class UploadData {
 		return failedToParse;
 	}
 	
-	public static UploadData fromStore(Context context) throws IOException, ClassNotFoundException {
+	public static UploadData fromStore() throws IOException, ClassNotFoundException {
 		return new UploadData(
-				new Store<Transaction>(context, Transaction.class).get(),
-				new Store<String>(context, String.class).get()
-				);
+                StoreFactory.getInstance().transactionStore().get(),
+                StoreFactory.getInstance().failedToParseStore().get()
+        );
 	}
 }
