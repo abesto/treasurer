@@ -6,10 +6,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserStoreAdapter;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +23,7 @@ import java.util.List;
 public class LoadActivity extends Activity {
     protected ProgressDialog progressDialog;
     private SmsParserStoreAdapter parser;
+    public static final String TAG = "LoadActivity";
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -36,15 +39,19 @@ public class LoadActivity extends Activity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading transactions");
         progressDialog.setMessage("Loading transactions from SMS messages. Please wait...");
+        Log.d(TAG, "onCreate");
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Calendar cal = Calendar.getInstance();
-        updateDatePickerWithCalendar(R.id.date_until, cal);
-        cal.add(Calendar.MONTH, -1);
-        updateDatePickerWithCalendar(R.id.date_from, cal);
+        Calendar from = Calendar.getInstance();
+        from.add(Calendar.MONTH, -1);
+        updateDatePickerWithCalendar(R.id.date_from, from);
+        Calendar until = Calendar.getInstance();
+        updateDatePickerWithCalendar(R.id.date_until, until);
+        Log.i(TAG, "onStart " + DateFormatUtils.ISO_DATE_FORMAT.format(from)
+                + " to " + DateFormatUtils.ISO_DATE_FORMAT.format(until));
     }
 
     private Calendar getCalendarFromDatePicker(int id) {
@@ -64,9 +71,11 @@ public class LoadActivity extends Activity {
     }
 
     public void onLoadClicked(@SuppressWarnings("UnusedParameters") View v) {
+        Log.d(TAG, "load_clicked");
         AsyncTask<Void, Integer, Void> loadTask = new AsyncTask<Void, Integer, Void>(){
             @Override
             protected void onPreExecute() {
+                Log.i(TAG, "pre_execute");
                 progressDialog.setIndeterminate(true);
                 progressDialog.setProgress(0);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -101,6 +110,7 @@ public class LoadActivity extends Activity {
             protected void onPostExecute(Void result) {
                 progressDialog.dismiss();
                 finish();
+                Log.i(TAG, "post_execute");
             }
         };
         loadTask.execute();
@@ -108,6 +118,8 @@ public class LoadActivity extends Activity {
 
     private List<String> loadMessagesBetween(Calendar from, Calendar to) {
         ArrayList<String> messages = new ArrayList<String>();
+        Log.i(TAG, "loading_smses_between " + DateFormatUtils.ISO_DATE_FORMAT.format(from)
+                + " " + DateFormatUtils.ISO_DATE_FORMAT.format(to));
 
         final String[] projection =
                 new String[] { "body" };
@@ -138,6 +150,7 @@ public class LoadActivity extends Activity {
                 cursor.close();
             }
         }
+        Log.i(TAG, "loaded_sms_count " + messages.size());
         return messages;
     }
 }

@@ -1,42 +1,131 @@
 package net.abesto.treasurer.filters;
 
+import android.content.Context;
+import android.text.Html;
+import android.util.Pair;
+import net.abesto.treasurer.R;
+import net.abesto.treasurer.Store;
+import net.abesto.treasurer.StoreFactory;
 import net.abesto.treasurer.Transaction;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.List;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import android.util.Log;
 
 public class PayeeToCategoryFilter implements TransactionFilter {
-	private Map<String, List<String>> getMap() {
-		Map<String, List<String>> m = new HashMap<String, List<String>>();
-		m.put("Monthly Bills: BKV", new LinkedList<String>(Arrays.asList("bérlet", "berlet")));
-		m.put("Everyday Expenses: Groceries", new LinkedList<String>(Arrays.asList(
-				"tesco", "dm")));
-		m.put("Everyday Expenses: Household Goods", new LinkedList<String>(Arrays.asList(
-				"kika", "media markt")));
-		m.put("Everyday Expenses: Restaurants, Ordered food", new LinkedList<String>(Arrays.asList(
-				"étterem", "etterem")));
-		m.put("Everyday Expenses: Software", new LinkedList<String>(Arrays.asList("sony")));
-		return m;
+    public static final String TAG = "PayeeToCategoryFilter";
+
+    public static class RulePattern implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Pattern pattern;
+        private String string;
+
+        public RulePattern(String string) {
+            this.string = string;
+            this.pattern = Pattern.compile(Pattern.quote(string), Pattern.CASE_INSENSITIVE);
+        }
+
+        public Pattern getPattern() {
+            return pattern;
+        }
+
+        public boolean find(String string) {
+            return this.pattern.matcher(string).find();
+        }
+
+        @Override
+        public String toString() {
+            return string;
+        }
+
+        @Override
+        public int hashCode() {
+            return string.hashCode();
+        }
+    }
+
+    public static class Rule implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String category;
+        private Set<RulePattern> payeePatterns;
+
+        public Rule(String category, String... patterns) {
+            this.category = category;
+            this.payeePatterns = new HashSet<RulePattern>();
+            for (String p : patterns) {
+                addPattern(p);
+            }
+        }
+
+        public Boolean matches(String payee) {
+            for (RulePattern p : payeePatterns) {
+                if (p.find(payee)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public RulePattern[] getPayeePatterns() {
+            return payeePatterns.toArray(new RulePattern[payeePatterns.size()]);
+        }
+
+        public void addPattern(String pattern) {
+            payeePatterns.add(new RulePattern(pattern));
+        }
+
+        public void removePattern(String toRemove) {
+            for (RulePattern p : payeePatterns) {
+                if (p.toString().equals(toRemove)) {
+                    payeePatterns.remove(p);
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            // For usage in ArrayAdapter<Rule>
+            return getCategory();
+        }
+    }
+
+	public static void loadTestData() {
+        Store<Rule> store = StoreFactory.getInstance().payeeToCategoryRuleStore();
+        try {
+            store.flush();
+            store.add(new Rule("Monthly Bills: BKV", "bérlet", "berlet"));
+            store.add(new Rule("Everyday Expenses: Groceries", "tesco", "dm"));
+            store.add(new Rule("Everyday Expenses: Household Goods", "kika", "media markt"));
+            store.add(new Rule("Everyday Expenses: Restaurants, Ordered food", "etterem", "étterem"));
+            store.add(new Rule("Everyday Expenses: Software", "sony"));
+        } catch (IOException e) {
+            Log.e(TAG, "loadTestData failed", e);
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "loadTestData failed", e);
+        }
 	}
 
 	@Override
 	public void filter(Transaction t) {
-		Map<String, List<String>> map = getMap();
-		for (String category : map.keySet()) {
-			for (String payeeSubstring : map.get(category)) {
-				Pattern p = Pattern.compile(Pattern.quote(payeeSubstring), Pattern.CASE_INSENSITIVE);
-				if (p.matcher(t.getPayee()).find()) {
-					t.setCategory(category);
-					return;
-				}
-			}
-		}
-		Log.w("PayeeToCategoryFilter", "No category found for payee " + t.getPayee());
+        try {
+            for (Rule rule : StoreFactory.getInstance().payeeToCategoryRuleStore().get()) {
+                if (rule.matches(t.getPayee())) {
+                    t.setCategory(rule.getCategory());
+                    Log.i(TAG, "matched \"" + t.getPayee() + "\" \"" + rule.getCategory() + '"');
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "rule_store_load_failed", e);
+        }
+        Log.i(TAG, "no_category_found '" + t.getPayee() + '"');
 	}
 }

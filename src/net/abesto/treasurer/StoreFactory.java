@@ -1,5 +1,7 @@
 package net.abesto.treasurer;
 
+import net.abesto.treasurer.filters.PayeeToCategoryFilter;
+
 public class StoreFactory {
     private static StoreFactory instance;
 
@@ -11,8 +13,8 @@ public class StoreFactory {
         return Store.getInstance("FailedToParse");
     }
 
-    public Store<String> categoryStore() {
-        return Store.getInstance("Category");
+    public Store<PayeeToCategoryFilter.Rule> payeeToCategoryRuleStore() {
+        return Store.getInstance("PayeeToCategoryRule");
     }
 
     private StoreFactory() {}

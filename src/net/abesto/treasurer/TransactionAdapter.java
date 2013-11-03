@@ -1,6 +1,7 @@
 package net.abesto.treasurer;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,11 +9,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class TransactionAdapter extends ArrayAdapter<Transaction> {
 
     private Context context;
+    private static final String TAG = "TransactionAdapter";
 
     public TransactionAdapter(Context context, int resourceId, ArrayList<Transaction> items) {
         super(context, resourceId, items);
@@ -52,5 +55,17 @@ public class TransactionAdapter extends ArrayAdapter<Transaction> {
          }
 
         return view;
+    }
+
+    @Override
+    public void add(Transaction object) {
+        super.add(object);
+        Log.i(TAG, "added " + object);
+    }
+
+    @Override
+    public void addAll(Collection<? extends Transaction> collection) {
+        super.addAll(collection);
+        Log.i(TAG, "added_all" + collection);
     }
 }

@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserStoreAdapter;
@@ -31,7 +32,10 @@ public class MainActivity extends ListActivity {
     private TransactionAdapter adapter;
     private SmsParserStoreAdapter parser;
 
+    private static final String TAG = "MainActivity";
+
     private static final int REQUEST_CODE_LOAD = 1;
+    public static final int REQUEST_CODE_PAYEE_RULES = 2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,7 @@ public class MainActivity extends ListActivity {
         initializeParser();
         registerSmsListener();
         registerOnCreateContextMenuHandler();
+        Log.i(TAG, "onCreate");
     }
 
     private void registerSmsListener() {
@@ -59,6 +64,7 @@ public class MainActivity extends ListActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(receiver, filter);
+        Log.i(TAG, "registered_sms_listener");
     }
 
     private void initializeParser() {
@@ -71,7 +77,7 @@ public class MainActivity extends ListActivity {
     private void initializeListAdapter() {
         try {
             adapter = new TransactionAdapter(
-                    this, getListView().getId(),
+                    this, R.layout.transaction_list_item,
                     new ArrayList<Transaction>(transactionStore.get()));
         } catch (Exception e) {
             e.printStackTrace();
@@ -126,14 +132,26 @@ public class MainActivity extends ListActivity {
 
     @SuppressWarnings("UnusedDeclaration")
     public void onLoadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+        Log.i(TAG, "load_clicked");
         Intent intent = new Intent(this, LoadActivity.class);
         startActivityForResult(intent, REQUEST_CODE_LOAD);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void onPayeeRulesClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+        Log.i(TAG, "edit_payee_rules_clicked");
+        Intent intent = new Intent(this, CategoryListActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_PAYEE_RULES);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case REQUEST_CODE_LOAD:
                 repopulateFromStore();
+                Log.i(TAG, LoadActivity.TAG + " finished");
+                break;
+            case REQUEST_CODE_PAYEE_RULES:
+                Log.i(TAG, CategoryListActivity.TAG + " finished");
                 break;
             default:
                 Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);
@@ -142,12 +160,15 @@ public class MainActivity extends ListActivity {
 
     @SuppressWarnings("UnusedDeclaration")
     public void onClearClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+        Log.d(TAG, "clear_clicked");
         try {
             transactionStore.flush();
             failedToParseStore.flush();
             adapter.clear();
+            Log.i(TAG, "cleared_transaction_list");
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "clear_transation_list_failed", e);
+            SimpleAlertDialog.show(this, "Failed to clear transaction list", e.toString());
         }
     }
 	
@@ -187,9 +208,7 @@ public class MainActivity extends ListActivity {
     private void repopulateFromStore() {
         adapter.clear();
         try {
-            for (Transaction t : transactionStore.get()) {
-                adapter.add(t);
-            }
+            adapter.addAll(transactionStore.get());
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Reload failed", e.toString());
         }
@@ -198,6 +217,7 @@ public class MainActivity extends ListActivity {
     @SuppressWarnings("UnusedDeclaration")
     public void onReloadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
         repopulateFromStore();
+        PayeeToCategoryFilter.loadTestData();
     }
 
     @Override

@@ -1,11 +1,13 @@
 package net.abesto.treasurer;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.Serializable;
 import java.util.Date;
 
 
 public class Transaction implements Serializable {
-	private static final long serialVersionUID = 4448529823537276240L;
+	private static final long serialVersionUID = 1L;
 	private Date date;
 	private String payee;
 	private String category;
@@ -57,7 +59,12 @@ public class Transaction implements Serializable {
 		return "-" + outflow.toString();
 	}
 
-	@Override
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

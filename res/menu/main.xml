@@ -1,8 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
-        android:showAsAction="never"
+        android:showAsAction="always"
         android:title="@string/action_send"
         android:onClick="onSendClicked"/>
+    <item
+        android:showAsAction="never"
+        android:title="@string/action_clear"
+        android:onClick="onClearClicked"/>
     <item
         android:showAsAction="never"
         android:title="@string/action_load"
@@ -13,8 +17,8 @@
         android:onClick="onReloadClicked"/>
     <item
         android:showAsAction="never"
-        android:title="@string/action_clear"
-        android:onClick="onClearClicked"/>
+        android:title="@string/action_payee_rules"
+        android:onClick="onPayeeRulesClicked"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
