@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +49,7 @@ public class Store<Data extends Serializable> {
         return (Store<D>) instanceMap.get(id);
     }
 
-	private void save(List<Data> d) throws FileNotFoundException, IOException {
+	private void save(List<Data> d) throws IOException {
 		ObjectOutputStream out = new ObjectOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE));
 		out.writeObject(d);
 		out.close();
@@ -64,7 +63,7 @@ public class Store<Data extends Serializable> {
 		return ret;
 	}
 	
-	public void add(Data item) throws StreamCorruptedException, FileNotFoundException, IOException, ClassNotFoundException {
+	public void add(Data item) throws IOException, ClassNotFoundException {
 		List<Data> data = get();
 		data.add(item);
 		save(data);
@@ -76,7 +75,7 @@ public class Store<Data extends Serializable> {
 		save(d);
 	}
 	
-	public void flush() throws FileNotFoundException, IOException {
+	public void flush() throws IOException {
 		save(new LinkedList<Data>());
 	}
 
