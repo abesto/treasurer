@@ -6,12 +6,14 @@ import net.abesto.treasurer.Transaction;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.Normalizer;
 import java.util.*;
 
 import android.util.Log;
 
 public class PayeeToCategoryFilter implements TransactionFilter {
     public static final String TAG = "PayeeToCategoryFilter";
+    private Store<Rule> store;
 
     public static class Rule implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -26,9 +28,13 @@ public class PayeeToCategoryFilter implements TransactionFilter {
             }
         }
 
+        private String normalize(String s) {
+            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        }
+
         public Boolean matches(String payee) {
             for (String p : payeeSubstrings) {
-                if (payee.contains(p)) {
+                if (normalize(payee).contains(normalize(p))) {
                     return true;
                 }
             }
@@ -58,8 +64,20 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         }
     }
 
-	public static void loadTestData() {
-        Store<Rule> store = StoreFactory.getInstance().payeeToCategoryRuleStore();
+    public PayeeToCategoryFilter(Store<Rule> store) {
+        this.store = store;
+    }
+
+    public PayeeToCategoryFilter() {
+        this(getDefaultStore());
+    }
+
+    private static Store<Rule> getDefaultStore() {
+        return StoreFactory.getInstance().payeeToCategoryRuleStore();
+    }
+
+    public static void loadTestData() {
+        Store<Rule> store = getDefaultStore();
         try {
             store.flush();
             store.add(new Rule("Monthly Bills: BKV", "bérlet", "berlet"));
@@ -77,7 +95,7 @@ public class PayeeToCategoryFilter implements TransactionFilter {
 	@Override
 	public void filter(Transaction t) {
         try {
-            for (Rule rule : StoreFactory.getInstance().payeeToCategoryRuleStore().get()) {
+            for (Rule rule : store.get()) {
                 if (rule.matches(t.getPayee())) {
                     t.setCategory(rule.getCategory());
                     Log.i(TAG, "matched \"" + t.getPayee() + "\" \"" + rule.getCategory() + '"');
