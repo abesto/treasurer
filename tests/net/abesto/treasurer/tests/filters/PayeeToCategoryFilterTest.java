@@ -123,4 +123,22 @@ public class PayeeToCategoryFilterTest {
         assertPayeeNotMatched("ö");
         assertPayeeNotMatched("ő");
     }
+
+    @Test
+    public void testCaseInsensitive1() {
+        String category = randomString();
+        String payee = randomString();
+        String uppercase = payee.toUpperCase();
+        addRule(category, payee);
+        assertPayeeToCategory(uppercase, category);
+    }
+
+    @Test
+    public void testCaseInsensitive2() {
+        String category = randomString();
+        String payee = randomString();
+        String uppercase = payee.toUpperCase();
+        addRule(category, uppercase);
+        assertPayeeToCategory(payee, category);
+    }
 }

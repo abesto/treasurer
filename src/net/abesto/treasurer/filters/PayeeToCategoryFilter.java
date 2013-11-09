@@ -19,6 +19,7 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         private static final long serialVersionUID = 1L;
         private String category;
         private Set<String> payeeSubstrings;
+        private UUID uuid = UUID.randomUUID();
 
         public Rule(String category, String... patterns) {
             this.category = category;
@@ -29,7 +30,7 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         }
 
         private String normalize(String s) {
-            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+            return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "").toLowerCase();
         }
 
         public Boolean matches(String payee) {
@@ -45,8 +46,12 @@ public class PayeeToCategoryFilter implements TransactionFilter {
             return category;
         }
 
-        public String[] getPayeeSubstrings() {
-            return payeeSubstrings.toArray(new String[payeeSubstrings.size()]);
+        public UUID getUuid() {
+            return getUuid();
+        }
+
+        public Set<String> getPayeeSubstrings() {
+            return payeeSubstrings;
         }
 
         public void addPayeeSubstring (String pattern) {
@@ -61,6 +66,24 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         public String toString() {
             // For usage in ArrayAdapter<Rule>
             return getCategory();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Rule)) {
+                return false;
+            }
+            return ((Rule)o).uuid == uuid;
+        }
+
+        public void save(Store<Rule> store) throws IOException, ClassNotFoundException {
+            List<Rule> list = store.get();
+            list.set(list.indexOf(this), this);
+            store.save(list);
+        }
+
+        public void save() throws IOException, ClassNotFoundException {
+            save(getDefaultStore());
         }
     }
 
