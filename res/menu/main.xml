@@ -1,28 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
-        android:showAsAction="always"
-        android:title="@string/action_send"
-        android:onClick="onSendClicked"/>
+        android:id="@+id/main_action_send"
+        android:title="@string/action_send"/>
     <item
-        android:showAsAction="never"
-        android:title="@string/action_clear"
-        android:onClick="onClearClicked"/>
+        android:id="@+id/main_action_clear"
+        android:title="@string/action_clear"/>
     <item
-        android:showAsAction="never"
-        android:title="@string/action_load"
-        android:onClick="onLoadClicked"/>
+        android:id="@+id/main_action_load"
+        android:title="@string/action_load"/>
     <item
-        android:showAsAction="never"
-        android:title="@string/action_reload"
-        android:onClick="onReloadClicked"/>
+        android:id="@+id/main_action_reload"
+        android:title="@string/action_reload"/>
     <item
-        android:showAsAction="never"
-        android:title="@string/action_payee_rules"
-        android:onClick="onPayeeRulesClicked"/>
+        android:id="@+id/main_action_payee_rules"
+        android:title="@string/action_payee_rules"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="@string/action_settings"/>
 
 </menu>

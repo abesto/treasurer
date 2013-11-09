@@ -9,8 +9,7 @@
         android:layout_height="80sp"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/textViewFrom"
-        android:layout_marginBottom="1sp"        
-        android:calendarViewShown="false" />
+        android:layout_marginBottom="1sp"/>
 
 
     <TextView
@@ -29,6 +28,5 @@
         android:layout_width="wrap_content"
         android:layout_marginBottom="1sp"
         android:layout_below="@+id/textViewTo"
-        android:calendarViewShown="false"
         />
 </RelativeLayout>

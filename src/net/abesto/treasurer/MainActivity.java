@@ -130,15 +130,13 @@ public class MainActivity extends ListActivity {
 		return true;
 	}
 
-    @SuppressWarnings("UnusedDeclaration")
-    public void onLoadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+    public void startLoadActivity() {
         Log.i(TAG, "load_clicked");
         Intent intent = new Intent(this, LoadActivity.class);
         startActivityForResult(intent, REQUEST_CODE_LOAD);
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public void onPayeeRulesClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+    public void openCategoryEditor() {
         Log.i(TAG, "edit_payee_rules_clicked");
         Intent intent = new Intent(this, CategoryListActivity.class);
         startActivityForResult(intent, REQUEST_CODE_PAYEE_RULES);
@@ -158,8 +156,7 @@ public class MainActivity extends ListActivity {
         }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public void onClearClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+    public void clear() {
         Log.d(TAG, "clear_clicked");
         try {
             transactionStore.flush();
@@ -172,8 +169,7 @@ public class MainActivity extends ListActivity {
         }
     }
 	
-    @SuppressWarnings("UnusedDeclaration")
-    public void onSendClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+    public void sendTransactions() {
         removeCacheFiles();
         UploadData data;
         try {
@@ -214,8 +210,7 @@ public class MainActivity extends ListActivity {
         }
     }
 	
-    @SuppressWarnings("UnusedDeclaration")
-    public void onReloadClicked(@SuppressWarnings("UnusedParameters") MenuItem m) {
+    public void reload() {
         repopulateFromStore();
         PayeeToCategoryFilter.loadTestData();
     }
@@ -224,5 +219,28 @@ public class MainActivity extends ListActivity {
     public void onDestroy() {
         super.onDestroy();
         this.unregisterReceiver(receiver);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.main_action_payee_rules:
+                openCategoryEditor();
+                return true;
+            case R.id.main_action_reload:
+                reload();
+                return true;
+            case R.id.main_action_clear:
+                clear();
+                return true;
+            case R.id.main_action_load:
+                startLoadActivity();
+                return true;
+            case R.id.main_action_send:
+                sendTransactions();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

@@ -63,9 +63,10 @@ public class TransactionAdapter extends ArrayAdapter<Transaction> {
         Log.i(TAG, "added " + object);
     }
 
-    @Override
     public void addAll(Collection<? extends Transaction> collection) {
-        super.addAll(collection);
+        for (Transaction t : collection) {
+            super.add(t);
+        }
         Log.i(TAG, "added_all" + collection);
     }
 }
