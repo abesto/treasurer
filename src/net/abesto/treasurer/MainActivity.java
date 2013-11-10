@@ -2,8 +2,12 @@ package net.abesto.treasurer;
 
 
 import android.app.ListActivity;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -11,16 +15,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.parsers.ParseResult;
 import net.abesto.treasurer.parsers.ParserFactory;
-import net.abesto.treasurer.parsers.SmsParserStoreAdapter;
+import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
+import net.abesto.treasurer.provider.Provider;
 import net.abesto.treasurer.upload.*;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class MainActivity extends ListActivity {
 
@@ -29,8 +36,8 @@ public class MainActivity extends ListActivity {
 	private SmsReceiver receiver;
     private static final String otp = "+36309400700";
 
-    private TransactionAdapter adapter;
-    private SmsParserStoreAdapter parser;
+    private SimpleCursorAdapter adapter;
+    private SmsParserDatabaseAdapter parser;
 
     private static final String TAG = "MainActivity";
 
@@ -50,15 +57,13 @@ public class MainActivity extends ListActivity {
     }
 
     private void registerSmsListener() {
+        final Context context = this;
         Set<String> wantedSenders= new HashSet<String>();
         wantedSenders.add(otp);
         receiver = new SmsReceiver(wantedSenders, new SmsReceiver.Handler() {
             @Override
             public void handle(String sms) {
-                ParseResult r = parser.parse(sms);
-                if (r.isSuccess()) {
-                    adapter.add(r.getTransaction());
-                }
+                parser.parse(sms);
             }
         });
         IntentFilter filter = new IntentFilter();
@@ -68,17 +73,26 @@ public class MainActivity extends ListActivity {
     }
 
     private void initializeParser() {
-        parser = new SmsParserStoreAdapter(
+        parser = new SmsParserDatabaseAdapter(
                 ParserFactory.getInstance().buildFromConfig(),
-                transactionStore, failedToParseStore
+                this
         );
     }
 
     private void initializeListAdapter() {
         try {
-            adapter = new TransactionAdapter(
-                    this, R.layout.transaction_list_item,
-                    new ArrayList<Transaction>(transactionStore.get()));
+            String[] columns =  new String[] {
+                    TreasurerContract.Transaction.COMPUTED_FLOW,
+                    TreasurerContract.Transaction.PAYEE,
+                    TreasurerContract.Category.NAME
+            };
+            Cursor c = getContentResolver().query(
+                    Provider.TRANSACTIONS_URI,
+                    ArrayUtils.add(columns, 0, TreasurerContract.Transaction.FULL_ID),
+                    null, null, null);
+            adapter = new SimpleCursorAdapter(
+                    this, R.layout.transaction_list_item, c, columns,
+                    new int[] {R.id.flow, R.id.payee, R.id.category});
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("init", "failed to create adapter");
@@ -98,13 +112,12 @@ public class MainActivity extends ListActivity {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-                Transaction t = adapter.getItem(info.position);
-                try {
-                    StoreFactory.getInstance().transactionStore().remove(t);
-                    adapter.remove(t);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    SimpleAlertDialog.show(getApplicationContext(), "Failed to remove transaction", e.toString());
+                int deletedRows = getContentResolver().delete(
+                        Uri.withAppendedPath(Provider.TRANSACTIONS_URI, new Long(info.id).toString()),
+                        null, null
+                );
+                if (deletedRows != 1) {
+                    Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
                 }
                 return true;
             }
@@ -114,8 +127,23 @@ public class MainActivity extends ListActivity {
             @Override
             public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) contextMenuInfo;
-                Transaction t = adapter.getItem(info.position);
-                contextMenu.setHeaderTitle(t.getFlow() + " " + t.getCategory() + " " + t.getDate());
+                Cursor c = getContentResolver().query(
+                        Uri.withAppendedPath(Provider.TRANSACTIONS_URI, new Long(info.id).toString()),
+                        new String[]{
+                                TreasurerContract.Transaction.FULL_ID,
+                                TreasurerContract.Transaction.COMPUTED_FLOW,
+                                TreasurerContract.Category.NAME,
+                                TreasurerContract.Transaction.DATE
+                        }, null, null, null
+                );
+
+                if (c.getCount() == 0) {
+                    Log.e(TAG, String.format("longclicked_transaction_not_found %s %s", info.position, info.id));
+                    return;
+                }
+                c.moveToFirst();
+
+                contextMenu.setHeaderTitle(c.getString(1) + " " + c.getString(2) + " " +c.getString(3));
                 contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
                 contextMenu.add(Menu.NONE, 1, 1, "Cancel");
             }
@@ -159,9 +187,7 @@ public class MainActivity extends ListActivity {
     public void clear() {
         Log.d(TAG, "clear_clicked");
         try {
-            transactionStore.flush();
-            failedToParseStore.flush();
-            adapter.clear();
+            getContentResolver().delete(Provider.TRANSACTIONS_URI, null, null);
             Log.i(TAG, "cleared_transaction_list");
         } catch (Exception e) {
             Log.e(TAG, "clear_transation_list_failed", e);
@@ -202,9 +228,9 @@ public class MainActivity extends ListActivity {
     }
 
     private void repopulateFromStore() {
-        adapter.clear();
+//        adapter.clear();
         try {
-            adapter.addAll(transactionStore.get());
+//            adapter.addAll(transactionStore.get());
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Reload failed", e.toString());
         }
@@ -213,6 +239,21 @@ public class MainActivity extends ListActivity {
     public void reload() {
         repopulateFromStore();
         PayeeToCategoryFilter.loadTestData();
+
+        ContentValues v;
+
+        v = new ContentValues();
+        v.put(TreasurerContract.Category.NAME, UUID.randomUUID().toString());
+        Uri category = getContentResolver().insert(Provider.CATEGORIES_URI, v);
+
+        v = new ContentValues();
+        v.put(TreasurerContract.Transaction.CATEGORY_ID, category.getLastPathSegment());
+        v.put(TreasurerContract.Transaction.DATE, 500);
+        v.put(TreasurerContract.Transaction.INFLOW, 0);
+        v.put(TreasurerContract.Transaction.OUTFLOW, 999);
+        v.put(TreasurerContract.Transaction.MEMO, "foo memo");
+        v.put(TreasurerContract.Transaction.PAYEE, 4);
+        getContentResolver().insert(Provider.TRANSACTIONS_URI, v);
     }
 
     @Override

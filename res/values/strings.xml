@@ -8,4 +8,5 @@
     <string name="action_clear">Clear</string>
     <string name="action_send">Send</string>
     <string name="action_payee_rules">Edit payee-category rules</string>
+    <string name="payee_list_new">Add a new one</string>
 </resources>

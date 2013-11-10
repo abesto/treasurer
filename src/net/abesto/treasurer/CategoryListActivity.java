@@ -24,18 +24,25 @@ public class CategoryListActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        setTitle("Treasurer > Categories");
         ruleStore = StoreFactory.getInstance().payeeToCategoryRuleStore();
+        Log.i(TAG, "onCreate");
+	}
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         try {
             setListAdapter(
-                new ArrayAdapter<Rule>(this, android.R.layout.simple_list_item_1, ruleStore.get())
+                    new ArrayAdapter<Rule>(this, android.R.layout.simple_list_item_1, ruleStore.get())
             );
         } catch (Exception e) {
-            Log.e(TAG, "onCreate failed_to_load_rules ", e);
+            Log.e(TAG, "onResume failed_to_load_rules ", e);
             SimpleAlertDialog.show(this, "Failed to load payee-category rules", e.toString());
             finish();
         }
-        Log.i(TAG, "onCreate");
-	}
+        Log.i(TAG, "onResume");
+    }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {

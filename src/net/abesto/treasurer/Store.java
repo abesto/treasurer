@@ -49,7 +49,7 @@ public class Store<Data extends Serializable> {
         return (Store<D>) instanceMap.get(id);
     }
 
-	private void save(List<Data> d) throws IOException {
+	public void save(List<Data> d) throws IOException {
 		ObjectOutputStream out = new ObjectOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE));
 		out.writeObject(d);
 		out.close();

@@ -1,8 +1,14 @@
 package net.abesto.treasurer;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import net.abesto.treasurer.provider.Provider;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
@@ -26,7 +32,34 @@ public class Transaction implements Serializable {
 		this.inflow = inflow;
 	}
 
-	public Date getDate() {
+    public ContentValues asContentValues(Context context) {
+        ContentValues v = new ContentValues();
+
+        v.put(TreasurerContract.Transaction.DATE, date.getTime());
+        v.put(TreasurerContract.Transaction.PAYEE, payee);
+        v.put(TreasurerContract.Transaction.CATEGORY_ID, getCategoryId(context));
+        v.put(TreasurerContract.Transaction.MEMO, memo);
+        v.put(TreasurerContract.Transaction.INFLOW, inflow);
+        v.put(TreasurerContract.Transaction.OUTFLOW, outflow);
+        return v;
+    }
+
+//    public static Transaction fromCursor(Cursor c) {
+//        return new Transaction(
+//                new Date(),
+//        );
+//    }
+
+    private int getCategoryId(Context context) {
+        Cursor categoryCursor = context.getContentResolver().query(
+                Uri.withAppendedPath(Provider.CATEGORIES_GET_OR_CREATE_URI, category),
+                null, null, null, null
+        );
+        categoryCursor.moveToFirst();
+        return categoryCursor.getInt(0);
+    }
+
+    public Date getDate() {
 		return date;
 	}
 

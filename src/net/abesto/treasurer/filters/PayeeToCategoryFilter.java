@@ -47,7 +47,7 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         }
 
         public UUID getUuid() {
-            return getUuid();
+            return uuid;
         }
 
         public Set<String> getPayeeSubstrings() {
@@ -78,12 +78,21 @@ public class PayeeToCategoryFilter implements TransactionFilter {
 
         public void save(Store<Rule> store) throws IOException, ClassNotFoundException {
             List<Rule> list = store.get();
-            list.set(list.indexOf(this), this);
+            int index = list.indexOf(this);
+            if (index == -1) {
+                list.add(this);
+            } else {
+                list.set(index, this);
+            }
             store.save(list);
         }
 
         public void save() throws IOException, ClassNotFoundException {
             save(getDefaultStore());
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
         }
     }
 

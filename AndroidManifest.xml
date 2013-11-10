@@ -29,6 +29,10 @@
         <activity android:name=".LoadActivity" />
         <activity android:name=".CategoryListActivity" />
         <activity android:name=".PayeeListActivity" />
+
+        <provider
+            android:name=".provider.Provider"
+            android:authorities="net.abesto.treasurer.provider" />
     </application>
 
 </manifest>

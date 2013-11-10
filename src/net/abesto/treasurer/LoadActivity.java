@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import net.abesto.treasurer.parsers.ParserFactory;
-import net.abesto.treasurer.parsers.SmsParserStoreAdapter;
+import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.ArrayList;
@@ -22,17 +22,16 @@ import java.util.List;
  */
 public class LoadActivity extends Activity {
     protected ProgressDialog progressDialog;
-    private SmsParserStoreAdapter parser;
+    private SmsParserDatabaseAdapter parser;
     public static final String TAG = "LoadActivity";
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        parser = new SmsParserStoreAdapter(
+        parser = new SmsParserDatabaseAdapter(
                 ParserFactory.getInstance().buildFromConfig(),
-                StoreFactory.getInstance().transactionStore(),
-                StoreFactory.getInstance().failedToParseStore()
+                this
         );
 
         setContentView(R.layout.activity_load);

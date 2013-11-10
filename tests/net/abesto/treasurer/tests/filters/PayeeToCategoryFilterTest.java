@@ -6,7 +6,10 @@ import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
+
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Date;
@@ -15,7 +18,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class PayeeToCategoryFilterTest {
@@ -43,9 +45,9 @@ public class PayeeToCategoryFilterTest {
     @Before
     public void setUp() throws IOException, ClassNotFoundException {
         //noinspection unchecked
-        Store<PayeeToCategoryFilter.Rule> store = (Store<PayeeToCategoryFilter.Rule>) mock(Store.class);
+        Store<PayeeToCategoryFilter.Rule> store = (Store<PayeeToCategoryFilter.Rule>) Mockito.mock(Store.class);
         rules = new LinkedList<PayeeToCategoryFilter.Rule>();
-        when(store.get()).thenReturn(rules);
+        Mockito.when(store.get()).thenReturn(rules);
         filter = new PayeeToCategoryFilter(store);
     }
 
