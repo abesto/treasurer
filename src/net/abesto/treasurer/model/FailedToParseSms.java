@@ -7,7 +7,7 @@ public class FailedToParseSms extends Model {
         this.message = message;
     }
 
-    public String getName() {
+    public String getMessage() {
         return message;
     }
 }

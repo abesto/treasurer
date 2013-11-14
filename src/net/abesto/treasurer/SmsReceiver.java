@@ -26,7 +26,7 @@ public class SmsReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
         if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
             Bundle bundle = intent.getExtras();
-            SmsMessage[] msgs = null;
+            SmsMessage[] msgs;
             String msg_from;
             if (bundle != null){
                 try{
@@ -40,8 +40,8 @@ public class SmsReceiver extends BroadcastReceiver {
                         	handler.handle(msgBody);
                         }
                     }
-                }catch(Exception e){
-                    Log.d("SmsReceiver",e.getMessage());
+                } catch(Exception e){
+                    Log.e("SmsReceiver", "failure", e);
                 }
             }
         }

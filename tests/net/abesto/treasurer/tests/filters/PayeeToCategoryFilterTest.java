@@ -1,6 +1,9 @@
 package net.abesto.treasurer.tests.filters;
 
-import net.abesto.treasurer.Store;
+import net.abesto.treasurer.database.ObjectNotFoundException;
+import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.model.Category;
+import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import org.junit.Before;
@@ -12,26 +15,31 @@ import org.robolectric.RobolectricTestRunner;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class PayeeToCategoryFilterTest {
     private PayeeToCategoryFilter filter;
-    private List<PayeeToCategoryFilter.Rule> rules;
+    private LinkedList<PayeeSubstringToCategory> rules;
+    private Long nextRandomLong = 0L;
 
-    private void assertPayeeToCategory(String payee, String category) {
+    private void assertPayeeToCategory(String payee, Long categoryId) {
         Transaction t = new Transaction(new Date(), payee, null, null, 0, 0);
         filter.filter(t);
-        assertEquals(category, t.getCategory());
+        assertEquals(categoryId, t.getCategoryId());
     }
 
     private void assertPayeeNotMatched(String payee) {
         assertPayeeToCategory(payee, null);
     }
 
-    private void addRule(String category, String... payeeSubstrings) {
-        rules.add(new PayeeToCategoryFilter.Rule(category, payeeSubstrings));
+    private void addRule(Long categoryId, String... payeeSubstrings) {
+        for (String payee : payeeSubstrings) {
+            rules.add(new PayeeSubstringToCategory(payee, categoryId));
+        }
     }
 
     private String randomString() {
@@ -39,17 +47,18 @@ public class PayeeToCategoryFilterTest {
     }
 
     @Before
-    public void setUp() throws IOException, ClassNotFoundException {
+    public void setUp() throws IOException, ClassNotFoundException, ObjectNotFoundException {
         //noinspection unchecked
-        Store<PayeeToCategoryFilter.Rule> store = (Store<PayeeToCategoryFilter.Rule>) Mockito.mock(Store.class);
-        rules = new LinkedList<PayeeToCategoryFilter.Rule>();
-        Mockito.when(store.get()).thenReturn(rules);
-        filter = new PayeeToCategoryFilter(store);
+        Queries queries = Mockito.mock(Queries.class);
+        rules = new LinkedList<PayeeSubstringToCategory>();
+        Mockito.when(queries.list(PayeeSubstringToCategory.class)).thenReturn(rules);
+        Mockito.when(queries.get(Mockito.eq(Category.class), Mockito.anyLong())).thenReturn(new Category("Mock category"));
+        filter = new PayeeToCategoryFilter(queries);
     }
 
     @Test
     public void testFullStringMatch() {
-        String category = randomString();
+        Long category = randomLong();
         String payee1 = randomString();
         String payee2 = randomString();
         addRule(category, payee1, payee2);
@@ -57,25 +66,29 @@ public class PayeeToCategoryFilterTest {
         assertPayeeToCategory(payee2, category);
     }
 
+    private Long randomLong() {
+        return nextRandomLong++;
+    }
+
     @Test
     public void testSecondRuleSecondPayee() {
-        String category = randomString();
+        Long category = randomLong();
         String payee = randomString();
-        addRule(randomString(), randomString(), randomString());
+        addRule(randomLong(), randomString(), randomString());
         addRule(category, randomString(), payee);
         assertPayeeToCategory(payee, category);
     }
 
     @Test
     public void testNoMatch() {
-        addRule(randomString(), randomString());
-        addRule(randomString(), randomString(), randomString());
+        addRule(randomLong(), randomString());
+        addRule(randomLong(), randomString(), randomString());
         assertPayeeNotMatched(randomString());
     }
 
     @Test
     public void testSubstring() {
-        String category = randomString();
+        Long category = randomLong();
         String payee = randomString();
         String payeeSubstring = payee.substring(5, 20);
         addRule(category, payeeSubstring);
@@ -84,7 +97,7 @@ public class PayeeToCategoryFilterTest {
 
     @Test
     public void testNonMatchingSubstring() {
-        String category = randomString();
+        Long category = randomLong();
         String payee = randomString();
         String payeeSubstring = payee.substring(5, 20);
         addRule(category, payeeSubstring);
@@ -101,7 +114,7 @@ public class PayeeToCategoryFilterTest {
     public void testAccents1() {
         String accented = "árvíztűrő tükörfúrógép";
         String unaccented = "arvizturo tukorfurogep";
-        String category = randomString();
+        Long category = randomLong();
         addRule(category, accented);
         assertPayeeToCategory(unaccented, category);
     }
@@ -110,21 +123,21 @@ public class PayeeToCategoryFilterTest {
     public void testAccents2() {
         String accented = "àrvíztűrő tükörfúrógép";
         String unaccented = "arvizturo tukorfurogep";
-        String category = randomString();
+        Long category = randomLong();
         addRule(category, unaccented);
         assertPayeeToCategory(accented, category);
     }
 
     @Test
     public void testAccentsNegative() {
-        addRule(randomString(), "a", "e");
+        addRule(randomLong(), "a", "e");
         assertPayeeNotMatched("ö");
         assertPayeeNotMatched("ő");
     }
 
     @Test
     public void testCaseInsensitive1() {
-        String category = randomString();
+        Long category = randomLong();
         String payee = randomString();
         String uppercase = payee.toUpperCase();
         addRule(category, payee);
@@ -133,7 +146,7 @@ public class PayeeToCategoryFilterTest {
 
     @Test
     public void testCaseInsensitive2() {
-        String category = randomString();
+        Long category = randomLong();
         String payee = randomString();
         String uppercase = payee.toUpperCase();
         addRule(category, uppercase);

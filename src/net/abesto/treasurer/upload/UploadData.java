@@ -24,8 +24,8 @@ public class UploadData {
 
     public static UploadData fromProvider() {
         return new UploadData(
-                Queries.list(Transaction.class),
-                Queries.list(FailedToParseSms.class)
+                Queries.getAppInstance().list(Transaction.class),
+                Queries.getAppInstance().list(FailedToParseSms.class)
         );
     }
 }

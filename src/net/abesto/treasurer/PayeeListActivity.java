@@ -30,7 +30,7 @@ public class PayeeListActivity extends ListActivity {
             throw new IllegalArgumentException("EXTRA_CATEGORY_ID must not be -1");
         }
         try {
-            category = Queries.get(Category.class, categoryId);
+            category = Queries.getAppInstance().get(Category.class, categoryId);
         } catch (ObjectNotFoundException e) {
             Log.e(TAG, "no_such_category " + categoryId);
             SimpleAlertDialog.show(this, "Category not found", "Failed to find category");
@@ -43,7 +43,7 @@ public class PayeeListActivity extends ListActivity {
 
     public void addPayee(String newPayee) {
         PayeeSubstringToCategory rule = new PayeeSubstringToCategory(newPayee, category.getId());
-        Queries.insert(rule);
+        Queries.getAppInstance().insert(rule);
         Log.i(TAG, "add_new_payee_substring_success");
     }
 

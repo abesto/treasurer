@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import net.abesto.treasurer.TreasurerContract;
-import net.abesto.treasurer.model.Model;
+import net.abesto.treasurer.model.*;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.provider.Provider;
 
@@ -56,7 +56,14 @@ public class ModelInflater {
     }
 
     private static ContentValues deflateTransaction(Transaction obj) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        ContentValues v = new ContentValues();
+        v.put(TreasurerContract.Transaction.DATE, obj.getDate().getTime());
+        v.put(TreasurerContract.Transaction.PAYEE, obj.getPayee());
+        v.put(TreasurerContract.Transaction.CATEGORY_ID, obj.getCategoryId());
+        v.put(TreasurerContract.Transaction.MEMO, obj.getMemo());
+        v.put(TreasurerContract.Transaction.INFLOW, obj.getInflow());
+        v.put(TreasurerContract.Transaction.OUTFLOW, obj.getOutflow());
+        return v;
     }
 
     public static <T> List<T> inflateAll(Class<T> cls, Cursor c) {
@@ -68,11 +75,11 @@ public class ModelInflater {
     }
 
     public static Uri getUri(Class cls) {
-        if (cls == Transaction.class) {
-            return Provider.TRANSACTIONS_URI;
-        } else {
-            throw new IllegalArgumentException("Don't know the ContentProvider URI for class " + cls.toString());
-        }
+        if (cls == Category.class) return Provider.CATEGORIES_URI;
+        if (cls == FailedToParseSms.class) return Provider.STRING_SET_URI;
+        if (cls == PayeeSubstringToCategory.class) return Provider.PAYEE_SUBSTRING_TO_CATEGORY_URI;
+        if (cls == Transaction.class) return Provider.TRANSACTIONS_URI;
+        throw new IllegalArgumentException("Don't know the ContentProvider URI for class " + cls.toString());
     }
 
     private static Transaction inflateTransaction(Cursor c) {

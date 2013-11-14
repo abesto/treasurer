@@ -63,7 +63,7 @@ public class Provider extends ContentProvider {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         int uriType = sUriMatcher.match(uri);
         if (uriType == TRANSACTIONS || uriType == TRANSACTION_ID) {
-            queryBuilder.setTables(Transaction.TABLE_NAME + " INNER JOIN " + Category.TABLE_NAME +
+            queryBuilder.setTables(Transaction.TABLE_NAME + " LEFT JOIN " + Category.TABLE_NAME +
                     " ON " + Transaction.CATEGORY_ID + "=" + Category.FULL_ID);
             if (ArrayUtils.contains(projection, Transaction.COMPUTED_FLOW)) {
                 projection[ArrayUtils.indexOf(projection, Transaction.COMPUTED_FLOW)] =
@@ -79,6 +79,8 @@ public class Provider extends ContentProvider {
             if (uriType == CATEGORY_ID) {
                 queryBuilder.appendWhere(Category.FULL_ID + "=" + uri.getLastPathSegment());
             }
+        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES) {
+            queryBuilder.setTables(PayeeSubstringToCategory.TABLE_NAME);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

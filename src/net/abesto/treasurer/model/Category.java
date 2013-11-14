@@ -3,8 +3,7 @@ package net.abesto.treasurer.model;
 public class Category extends Model {
     private String name;
 
-    public Category(Long id, String name) {
-        super(id);
+    public Category(String name) {
         this.name = name;
     }
 

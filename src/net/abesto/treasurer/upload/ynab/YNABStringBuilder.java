@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.abesto.treasurer.model.FailedToParseSms;
 import net.abesto.treasurer.model.Transaction;
 
 public class YNABStringBuilder {
@@ -50,8 +51,8 @@ public class YNABStringBuilder {
 		sb.append("\n");
 		
 		sb.append("Failed to parse ").append(data.failedToParse.size()).append(" SMS messages\n");
-		for (String line : data.failedToParse) {
-			sb.append(line).append("\n");
+		for (FailedToParseSms line : data.failedToParse) {
+			sb.append(line.getMessage()).append("\n");
 		}
 		
 		return sb.toString();

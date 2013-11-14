@@ -44,6 +44,7 @@ public class MainActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         UploaderFactory.initializeComponent(this);
+        Queries.initializeAppInstance(this);
         initializeListAdapter();
         initializeParser();
         registerSmsListener();
@@ -98,7 +99,7 @@ public class MainActivity extends ListActivity {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-                int deletedRows = Queries.delete(Transaction.class, info.id);
+                int deletedRows = Queries.getAppInstance().delete(Transaction.class, info.id);
                 if (deletedRows != 1) {
                     Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
                 }

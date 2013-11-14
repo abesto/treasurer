@@ -30,8 +30,7 @@ public class LoadActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         parser = new SmsParserDatabaseAdapter(
-                ParserFactory.getInstance().buildFromConfig(),
-                this
+                ParserFactory.getInstance().buildFromConfig()
         );
 
         setContentView(R.layout.activity_load);

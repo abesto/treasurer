@@ -28,18 +28,6 @@ public class Transaction extends Model{
 		this.inflow = inflow;
 	}
 
-    public ContentValues asContentValues() {
-        ContentValues v = new ContentValues();
-
-        v.put(TreasurerContract.Transaction.DATE, date.getTime());
-        v.put(TreasurerContract.Transaction.PAYEE, payee);
-        v.put(TreasurerContract.Transaction.CATEGORY_ID, categoryId);
-        v.put(TreasurerContract.Transaction.MEMO, memo);
-        v.put(TreasurerContract.Transaction.INFLOW, inflow);
-        v.put(TreasurerContract.Transaction.OUTFLOW, outflow);
-        return v;
-    }
-
     public Date getDate() {
 		return date;
 	}
@@ -59,7 +47,7 @@ public class Transaction extends Model{
     public Category getCategory() {
         if (!hasCategory()) return null;
         try {
-            return Queries.get(Category.class, categoryId);
+            return Queries.getAppInstance().get(Category.class, categoryId);
         } catch (ObjectNotFoundException e) {
             Log.e("Transaction", "getCategory_failed_to_find_category " + categoryId);
             return null;
