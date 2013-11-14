@@ -4,8 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.abesto.treasurer.Transaction;
-import net.abesto.treasurer.upload.ynab.YNABUploadData;
+import net.abesto.treasurer.model.Transaction;
 
 public class YNABStringBuilder {
 	private static final String csvHeader = "Date,Payee,Category,Memo,Outflow,Inflow";

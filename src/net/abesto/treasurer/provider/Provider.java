@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import net.abesto.treasurer.database.StringSetTable;
 import net.abesto.treasurer.database.TreasurerDatabaseHelper;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -19,11 +20,15 @@ public class Provider extends ContentProvider {
     private static final String TRANSACTIONS_PATH = "transactions";
     private static final String CATEGORIES_PATH = "categories";
     private static final String CATEGORIES_GET_OR_CREATE_PATH = "categories/get-or-create";
+    private static final String PAYEE_SUBSTRING_TO_CATEGORY_PATH = "payee-substring-to-category-rules";
+    private static final String STRING_SET_PATH = "stringset";
 
     private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY + "/");
     public static final Uri TRANSACTIONS_URI = Uri.withAppendedPath(BASE_URI, TRANSACTIONS_PATH);
     public static final Uri CATEGORIES_URI = Uri.withAppendedPath(BASE_URI, CATEGORIES_PATH);
     public static final Uri CATEGORIES_GET_OR_CREATE_URI = Uri.withAppendedPath(BASE_URI, CATEGORIES_GET_OR_CREATE_PATH);
+    public static final Uri PAYEE_SUBSTRING_TO_CATEGORY_URI = Uri.withAppendedPath(BASE_URI, PAYEE_SUBSTRING_TO_CATEGORY_PATH);
+    public static final Uri STRING_SET_URI = Uri.withAppendedPath(BASE_URI, STRING_SET_PATH);
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private static final int TRANSACTIONS = 10;
@@ -33,12 +38,18 @@ public class Provider extends ContentProvider {
     private static final int CATEGORY_GET_OR_CREATE = 14;
     private static final int PAYEE_SUBSTRING_TO_CATEGORY_RULES = 15;
     private static final int PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID = 16;
+    private static final int STRING_SETS = 17;
+    private static final int STRING_SET_ID = 18;
     static {
         sUriMatcher.addURI(AUTHORITY, TRANSACTIONS_PATH, TRANSACTIONS);
         sUriMatcher.addURI(AUTHORITY, TRANSACTIONS_PATH + "/#", TRANSACTION_ID);
         sUriMatcher.addURI(AUTHORITY, CATEGORIES_PATH, CATEGORIES);
         sUriMatcher.addURI(AUTHORITY, CATEGORIES_PATH + "/#", CATEGORY_ID);
         sUriMatcher.addURI(AUTHORITY, CATEGORIES_GET_OR_CREATE_PATH + "/*", CATEGORY_GET_OR_CREATE);
+        sUriMatcher.addURI(AUTHORITY, PAYEE_SUBSTRING_TO_CATEGORY_PATH, PAYEE_SUBSTRING_TO_CATEGORY_RULES);
+        sUriMatcher.addURI(AUTHORITY, PAYEE_SUBSTRING_TO_CATEGORY_PATH + "/#", PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID);
+        sUriMatcher.addURI(AUTHORITY, STRING_SET_PATH, STRING_SETS);
+        sUriMatcher.addURI(AUTHORITY, STRING_SET_PATH + "/#", STRING_SET_ID);
     }
 
     @Override
@@ -98,6 +109,8 @@ public class Provider extends ContentProvider {
             return insertToSqlite(uri, contentValues, Category.TABLE_NAME);
         } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES) {
             return insertToSqlite(uri, contentValues, PayeeSubstringToCategory.TABLE_NAME);
+        } else if (uriType == STRING_SETS) {
+            return insertToSqlite(uri, contentValues, StringSetTable.TABLE_NAME);
         } else if (uriType == TRANSACTION_ID || uriType == CATEGORY_ID) {
             throw new IllegalArgumentException("URI " + uri + " not valid for insert operation");
         } else {
@@ -110,7 +123,7 @@ public class Provider extends ContentProvider {
         Long id;
         id = sqlDB.insert(tableName, null, contentValues);
         getContext().getContentResolver().notifyChange(uri, null);
-        return Uri.withAppendedPath(TRANSACTIONS_URI, id.toString());
+        return Uri.withAppendedPath(uri, id.toString());
     }
 
     @Override

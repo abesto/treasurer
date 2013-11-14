@@ -15,6 +15,7 @@ public class TreasurerDatabaseHelper extends SQLiteOpenHelper {
         TransactionTable.onCreate(sqLiteDatabase);
         CategoryTable.onCreate(sqLiteDatabase);
         PayeeSubstringToCategoryTable.onCreate(sqLiteDatabase);
+        StringSetTable.onCreate(sqLiteDatabase);
     }
 
     @Override
@@ -22,5 +23,6 @@ public class TreasurerDatabaseHelper extends SQLiteOpenHelper {
         TransactionTable.onUpgrade(sqLiteDatabase, v0, v1);
         CategoryTable.onUpgrade(sqLiteDatabase, v0, v1);
         PayeeSubstringToCategoryTable.onUpgrade(sqLiteDatabase, v0, v1);
+        StringSetTable.onUpgrade(sqLiteDatabase, v0, v1);
     }
 }

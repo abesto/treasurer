@@ -1,6 +1,6 @@
 package net.abesto.treasurer.parsers;
 
-import net.abesto.treasurer.Transaction;
+import net.abesto.treasurer.model.Transaction;
 
 public class ParseResult {
 	private Boolean success;

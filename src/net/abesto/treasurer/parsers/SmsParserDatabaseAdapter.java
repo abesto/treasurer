@@ -1,19 +1,15 @@
 package net.abesto.treasurer.parsers;
 
-import android.content.Context;
 import android.util.Log;
-import net.abesto.treasurer.Store;
-import net.abesto.treasurer.Transaction;
-import net.abesto.treasurer.provider.Provider;
+import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.model.FailedToParseSms;
 
 public class SmsParserDatabaseAdapter implements SmsParser {
     private SmsParser parser;
-    private Context context;
     public static final String TAG = "SmsParserDatabaseAdapter";
 
-    public SmsParserDatabaseAdapter(SmsParser parser, Context context) {
+    public SmsParserDatabaseAdapter(SmsParser parser) {
         this.parser = parser;
-        this.context = context;
     }
 
     @Override
@@ -23,17 +19,15 @@ public class SmsParserDatabaseAdapter implements SmsParser {
         if (r.isSuccess()) {
             Log.i(TAG, "parse_success " + r.getTransaction());
             try {
-                context.getContentResolver().insert(
-                        Provider.TRANSACTIONS_URI,
-                        r.getTransaction().asContentValues(context)
-                );
+                Queries.insert(r.getTransaction());
             } catch (Exception e) {
                 Log.e(TAG, "transactionStore.add failed", e);
             }
         } else {
-            Log.i(TAG, "parse_failed");
             try {
-//                failedToParseStore.add(sms);
+                FailedToParseSms failedToParseSms = new FailedToParseSms(sms);
+                Queries.insert(failedToParseSms);
+                Log.i(TAG, String.format("parse_failed %s %d", sms, failedToParseSms.getId()));
             } catch (Exception e) {
                 Log.e(TAG, "failedToParseStore.add failed", e);
             }

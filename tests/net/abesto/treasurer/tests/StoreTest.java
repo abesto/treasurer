@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import net.abesto.treasurer.Store;
-import net.abesto.treasurer.Transaction;
+import net.abesto.treasurer.model.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 

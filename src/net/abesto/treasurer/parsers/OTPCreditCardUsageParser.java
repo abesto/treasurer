@@ -4,7 +4,7 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.abesto.treasurer.Transaction;
+import net.abesto.treasurer.model.Transaction;
 
 public class OTPCreditCardUsageParser implements SmsParser {
 	private static String patternString = "(\\d{2})(\\d{2})(\\d{2}) \\d{2}:\\d{2} k.rty.s v.s.rl.s[^:]*: -([0-9\\.]*) HUF; ([^;]*)";
@@ -19,8 +19,8 @@ public class OTPCreditCardUsageParser implements SmsParser {
 									  Integer.parseInt(m.group(2)),
 									  Integer.parseInt(m.group(3))
 				).getTime(),
-				m.group(5), // payee				
-				"",         // category
+				m.group(5), // payee
+                null,        // no category
 				"",         // memo
 				Integer.parseInt(m.group(4).replaceAll("\\.", ""), 10),  // outflow
 				0           // inflow

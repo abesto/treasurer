@@ -3,7 +3,6 @@ package net.abesto.treasurer;
 
 import android.app.ListActivity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -16,8 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
-import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-import net.abesto.treasurer.parsers.ParseResult;
+import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import net.abesto.treasurer.provider.Provider;
@@ -30,9 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends ListActivity {
-
-	private Store<Transaction> transactionStore;
-	private Store<String> failedToParseStore;
 	private SmsReceiver receiver;
     private static final String otp = "+36309400700";
 
@@ -47,7 +43,6 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        initializeStores();
         UploaderFactory.initializeComponent(this);
         initializeListAdapter();
         initializeParser();
@@ -57,7 +52,6 @@ public class MainActivity extends ListActivity {
     }
 
     private void registerSmsListener() {
-        final Context context = this;
         Set<String> wantedSenders= new HashSet<String>();
         wantedSenders.add(otp);
         receiver = new SmsReceiver(wantedSenders, new SmsReceiver.Handler() {
@@ -74,8 +68,7 @@ public class MainActivity extends ListActivity {
 
     private void initializeParser() {
         parser = new SmsParserDatabaseAdapter(
-                ParserFactory.getInstance().buildFromConfig(),
-                this
+                ParserFactory.getInstance().buildFromConfig()
         );
     }
 
@@ -100,22 +93,12 @@ public class MainActivity extends ListActivity {
         setListAdapter(adapter);
     }
 
-    private void initializeStores() {
-        Store.initializeComponent(this);
-        StoreFactory storeFactory = StoreFactory.getInstance();
-        transactionStore = storeFactory.transactionStore();
-        failedToParseStore = storeFactory.failedToParseStore();
-    }
-
     private void registerOnCreateContextMenuHandler() {
         final MenuItem.OnMenuItemClickListener deleteClicked = new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
-                int deletedRows = getContentResolver().delete(
-                        Uri.withAppendedPath(Provider.TRANSACTIONS_URI, new Long(info.id).toString()),
-                        null, null
-                );
+                int deletedRows = Queries.delete(Transaction.class, info.id);
                 if (deletedRows != 1) {
                     Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
                 }
@@ -172,10 +155,6 @@ public class MainActivity extends ListActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
-            case REQUEST_CODE_LOAD:
-                repopulateFromStore();
-                Log.i(TAG, LoadActivity.TAG + " finished");
-                break;
             case REQUEST_CODE_PAYEE_RULES:
                 Log.i(TAG, CategoryListActivity.TAG + " finished");
                 break;
@@ -199,7 +178,7 @@ public class MainActivity extends ListActivity {
         removeCacheFiles();
         UploadData data;
         try {
-            data = UploadData.fromStore();
+            data = UploadData.fromProvider();
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Failed to load data", e.toString());
             return;
@@ -227,19 +206,7 @@ public class MainActivity extends ListActivity {
         }
     }
 
-    private void repopulateFromStore() {
-//        adapter.clear();
-        try {
-//            adapter.addAll(transactionStore.get());
-        } catch (Exception e) {
-            SimpleAlertDialog.show(this, "Reload failed", e.toString());
-        }
-    }
-	
     public void reload() {
-        repopulateFromStore();
-        PayeeToCategoryFilter.loadTestData();
-
         ContentValues v;
 
         v = new ContentValues();

@@ -1,7 +1,7 @@
 package net.abesto.treasurer.tests.filters;
 
 import net.abesto.treasurer.Store;
-import net.abesto.treasurer.Transaction;
+import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,15 +9,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
-import static org.mockito.Mockito.*;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
-import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class PayeeToCategoryFilterTest {

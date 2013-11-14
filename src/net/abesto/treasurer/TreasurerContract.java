@@ -29,4 +29,13 @@ public abstract class TreasurerContract {
         public static final String CATEGORY_ID = "category_id";
         public static final String PAYEE_SUBSTRING = "payee_substring";
     }
+
+    public interface StringSet extends BaseColumns {
+        public static final String TABLE_NAME = "string_sets";
+        public static final String SET_ID = "set_id";
+        public static final String STRING = "string";
+
+        public static final int UNKNOWN_PAYEE_SET = 1;
+        public static final int FAILED_TO_PARSE_SMS_SET = 2;
+    }
 }
