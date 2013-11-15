@@ -3,17 +3,21 @@ package net.abesto.treasurer;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
+import net.abesto.treasurer.provider.Provider;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 
@@ -39,6 +43,25 @@ public class PayeeListActivity extends ListActivity {
         }
         setTitle(String.format("Treasurer > Categories > %s", category.getName()));
         Log.i(TAG, String.format("onCreate %s", categoryId));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            String[] columns =  new String[] { TreasurerContract.PayeeSubstringToCategory.PAYEE_SUBSTRING };
+            Cursor c = getContentResolver().query(
+                    Provider.PAYEE_SUBSTRING_TO_CATEGORY_URI,
+                    ArrayUtils.add(columns, 0, TreasurerContract.PayeeSubstringToCategory._ID),
+                    "category_id=?", new String[] { category.getId().toString() }, null);
+            setListAdapter(new SimpleCursorAdapter(
+                    this, android.R.layout.simple_list_item_1, c, columns,
+                    new int[] {android.R.id.text1}));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "failed to create adapter");
+        }
+        Log.i(TAG, "onResume");
     }
 
     public void addPayee(String newPayee) {
