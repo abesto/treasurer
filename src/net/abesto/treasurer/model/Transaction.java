@@ -65,6 +65,10 @@ public class Transaction extends Model{
 	public Integer getInflow() {
 		return inflow;
 	}
+
+    public Integer getFlow() {
+        return inflow - outflow;
+    }
 	
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;

@@ -79,8 +79,11 @@ public class Provider extends ContentProvider {
             if (uriType == CATEGORY_ID) {
                 queryBuilder.appendWhere(Category.FULL_ID + "=" + uri.getLastPathSegment());
             }
-        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES) {
+        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES || uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
             queryBuilder.setTables(PayeeSubstringToCategory.TABLE_NAME);
+            if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
+                queryBuilder.appendWhere(PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment());
+            }
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -137,6 +140,8 @@ public class Provider extends ContentProvider {
             rowsDeleted = sqlDB.delete(Transaction.TABLE_NAME, Transaction._ID + "=" + uri.getLastPathSegment(), null);
         } else if (uriType == TRANSACTIONS) {
             rowsDeleted = sqlDB.delete(Transaction.TABLE_NAME, selection, selectionArgs);
+        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
+            rowsDeleted = sqlDB.delete(PayeeSubstringToCategory.TABLE_NAME, PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment(), null);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

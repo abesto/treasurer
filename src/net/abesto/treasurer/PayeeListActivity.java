@@ -6,11 +6,11 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.*;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
@@ -42,6 +42,7 @@ public class PayeeListActivity extends ListActivity {
             return;
         }
         setTitle(String.format("Treasurer > Categories > %s", category.getName()));
+        registerOnCreateContextMenuHandler();
         Log.i(TAG, String.format("onCreate %s", categoryId));
     }
 
@@ -90,5 +91,61 @@ public class PayeeListActivity extends ListActivity {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.payee_list_action_create:
+                showNewPayeeDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void registerOnCreateContextMenuHandler() {
+        final MenuItem.OnMenuItemClickListener deleteClicked = new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
+                int deletedRows = Queries.getAppInstance().delete(PayeeSubstringToCategory.class, info.id);
+                if (deletedRows != 1) {
+                    Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
+                }
+                return true;
+            }
+        };
+
+        View.OnCreateContextMenuListener createListContextMenu = new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) contextMenuInfo;
+                PayeeSubstringToCategory r;
+                try {
+                    r = Queries.getAppInstance().get(PayeeSubstringToCategory.class, info.id);
+                } catch (ObjectNotFoundException e) {
+                    Log.e(TAG, "longclicked_rule_not_found_in_db", e);
+                    return;
+                }
+
+                try {
+                    contextMenu.setHeaderTitle(r.getSubstring() + " -> " + Queries.getAppInstance().get(Category.class, r.getCategoryId()));
+                } catch (ObjectNotFoundException e) {
+                    Log.e(TAG, "longclicked_rule_has_invalid_category_id", e);
+                    contextMenu.setHeaderTitle(r.getSubstring() + " -> (Unknown)");
+                }
+                contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
+                contextMenu.add(Menu.NONE, 1, 1, "Cancel");
+            }
+        };
+
+        getListView().setOnCreateContextMenuListener(createListContextMenu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.payee_list, menu);
+        return true;
     }
 }

@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
+import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.model.Category;
@@ -114,23 +115,15 @@ public class MainActivity extends ListActivity {
             @Override
             public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) contextMenuInfo;
-                Cursor c = getContentResolver().query(
-                        Uri.withAppendedPath(Provider.TRANSACTIONS_URI, new Long(info.id).toString()),
-                        new String[]{
-                                TreasurerContract.Transaction.FULL_ID,
-                                TreasurerContract.Transaction.COMPUTED_FLOW,
-                                TreasurerContract.Category.NAME,
-                                TreasurerContract.Transaction.DATE
-                        }, null, null, null
-                );
-
-                if (c.getCount() == 0) {
-                    Log.e(TAG, String.format("longclicked_transaction_not_found %s %s", info.position, info.id));
+                Transaction t;
+                try {
+                    t = Queries.getAppInstance().get(Transaction.class, info.id);
+                } catch (ObjectNotFoundException e) {
+                    Log.e(TAG, "longclicked_transaction_not_found_in_db", e);
                     return;
                 }
-                c.moveToFirst();
 
-                contextMenu.setHeaderTitle(c.getString(1) + " " + c.getString(2) + " " +c.getString(3));
+                contextMenu.setHeaderTitle(t.getFlow().toString() + " " + t.getCategory().getName() + " " + t.getDate());
                 contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
                 contextMenu.add(Menu.NONE, 1, 1, "Cancel");
             }
