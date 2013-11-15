@@ -167,7 +167,7 @@ public class Provider extends ContentProvider {
     }
 
     public Cursor getOrCreateCategoryId(String name, String[] projection, String selection, String[] selectionArgs) {
-        Cursor c = query(CATEGORIES_URI, new String[]{Category._ID}, Category.NAME + "=?", new String[]{name}, null);
+        Cursor c = query(CATEGORIES_URI, projection, Category.NAME + "=?", new String[]{name}, null);
         if (c.getCount() == 0) {
             ContentValues v = new ContentValues();
             v.put(Category.NAME, name);

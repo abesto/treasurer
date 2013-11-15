@@ -16,6 +16,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.filters.PayeeToCategoryFilter;
+import net.abesto.treasurer.model.Category;
+import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
@@ -208,20 +211,7 @@ public class MainActivity extends ListActivity {
     }
 
     public void reload() {
-        ContentValues v;
-
-        v = new ContentValues();
-        v.put(TreasurerContract.Category.NAME, UUID.randomUUID().toString());
-        Uri category = getContentResolver().insert(Provider.CATEGORIES_URI, v);
-
-        v = new ContentValues();
-        v.put(TreasurerContract.Transaction.CATEGORY_ID, category.getLastPathSegment());
-        v.put(TreasurerContract.Transaction.DATE, 500);
-        v.put(TreasurerContract.Transaction.INFLOW, 0);
-        v.put(TreasurerContract.Transaction.OUTFLOW, 999);
-        v.put(TreasurerContract.Transaction.MEMO, "foo memo");
-        v.put(TreasurerContract.Transaction.PAYEE, 4);
-        getContentResolver().insert(Provider.TRANSACTIONS_URI, v);
+        PayeeToCategoryFilter.loadTestData();
     }
 
     @Override

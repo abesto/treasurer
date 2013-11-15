@@ -6,7 +6,8 @@ import net.abesto.treasurer.TreasurerContract;
 
 public class PayeeSubstringToCategoryTable implements TreasurerContract.PayeeSubstringToCategory {
     private static final String SQL_CREATE_TABLE = "create table " + TABLE_NAME + "(" +
-            CATEGORY_ID + " integer primary key, " +
+            _ID + " integer primary key autoincrement, " +
+            CATEGORY_ID + " integer, " +
             PAYEE_SUBSTRING + " text, " +
             "foreign key ("+CATEGORY_ID+") references " + TreasurerContract.Category.TABLE_NAME + "(" + TreasurerContract.Category._ID + ")" +
             ")";

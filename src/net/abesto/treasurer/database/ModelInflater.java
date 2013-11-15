@@ -40,19 +40,32 @@ public class ModelInflater {
     }
 
     public static <T> T inflate(Class<T> cls, Cursor c) {
-        if (cls == Transaction.class) {
-            return (T) inflateTransaction(c);
-        } else {
-            throw new IllegalArgumentException("Don't know how to inflate " + c.toString());
-        }
+        if (cls == Transaction.class) return (T) inflateTransaction(c);
+        if (cls == Category.class) return (T) inflateCategory(c);
+        if (cls == PayeeSubstringToCategory.class) return (T) inflatePayeeSubstringToCategory(c);
+        throw new IllegalArgumentException("Don't know how to inflate " + cls.toString());
+    }
+
+    private static PayeeSubstringToCategory inflatePayeeSubstringToCategory(Cursor c) {
+        PayeeSubstringToCategory p = new PayeeSubstringToCategory(
+                getString(c, TreasurerContract.PayeeSubstringToCategory.PAYEE_SUBSTRING),
+                getLong(c, TreasurerContract.PayeeSubstringToCategory.CATEGORY_ID)
+        );
+        p.setId(getLong(c, TreasurerContract.PayeeSubstringToCategory._ID));
+        return p;
     }
 
     public static ContentValues deflate(Class<? extends Model> cls, Model obj) {
-        if (cls == Transaction.class) {
-            return deflateTransaction((Transaction) obj);
-        } else {
-            throw new IllegalArgumentException("Don't know how to deflate " + cls.toString());
-        }
+        if (cls == Transaction.class) return deflateTransaction((Transaction) obj);
+        if (cls == PayeeSubstringToCategory.class) return deflatePayeeSubstringToCategory((PayeeSubstringToCategory) obj);
+        throw new IllegalArgumentException("Don't know how to deflate " + cls.toString());
+    }
+
+    private static ContentValues deflatePayeeSubstringToCategory(PayeeSubstringToCategory obj) {
+        ContentValues v = new ContentValues();
+        v.put(TreasurerContract.PayeeSubstringToCategory.PAYEE_SUBSTRING, obj.getSubstring());
+        v.put(TreasurerContract.PayeeSubstringToCategory.CATEGORY_ID, obj.getCategoryId());
+        return v;
     }
 
     private static ContentValues deflateTransaction(Transaction obj) {
@@ -83,7 +96,7 @@ public class ModelInflater {
     }
 
     private static Transaction inflateTransaction(Cursor c) {
-        return new Transaction(
+       Transaction t = new Transaction(
                 new Date(),  // TODO
                 getString(c, TreasurerContract.Transaction.PAYEE),
                 getLong(c, TreasurerContract.Transaction.CATEGORY_ID),
@@ -91,6 +104,16 @@ public class ModelInflater {
                 getInt(c, TreasurerContract.Transaction.OUTFLOW),
                 getInt(c, TreasurerContract.Transaction.INFLOW)
         );
+        t.setId(getLong(c, TreasurerContract.Transaction._ID));
+        return t;
+    }
+
+    private static Category inflateCategory(Cursor c) {
+        Category cat = new Category(
+                getString(c, TreasurerContract.Category.NAME)
+        );
+        cat.setId(getLong(c, TreasurerContract.Category._ID));
+        return cat;
     }
 
     public static <T> T getDefault(Class<T> cls) {

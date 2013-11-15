@@ -1,5 +1,6 @@
 package net.abesto.treasurer.filters;
 
+import android.net.Uri;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
@@ -10,6 +11,7 @@ import java.text.Normalizer;
 import android.util.Log;
 import net.abesto.treasurer.TreasurerContract;
 import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.provider.Provider;
 
 public class PayeeToCategoryFilter implements TransactionFilter {
     public static final String TAG = "PayeeToCategoryFilter";
@@ -31,21 +33,13 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         return normalize(payee).contains(normalize(substring));
     }
 
-//    public static void loadTestData() {
-//        Store<Rule> store = getDefaultStore();
-//        try {
-//            store.flush();
-//            store.add(new Rule("Monthly Bills: BKV", "bérlet", "berlet"));
-//            store.add(new Rule("Everyday Expenses: Groceries", "tesco", "dm"));
-//            store.add(new Rule("Everyday Expenses: Household Goods", "kika", "media markt"));
-//            store.add(new Rule("Everyday Expenses: Restaurants, Ordered food", "etterem", "étterem"));
-//            store.add(new Rule("Everyday Expenses: Software", "sony"));
-//        } catch (IOException e) {
-//            Log.e(TAG, "loadTestData failed", e);
-//        } catch (ClassNotFoundException e) {
-//            Log.e(TAG, "loadTestData failed", e);
-//        }
-//	}
+    public static void loadTestData() {
+        Queries q = Queries.getAppInstance();
+        q.insert(new PayeeSubstringToCategory("etterem", q.getOrCreateCategory("Everyday Expenses: Restaurants, Ordered food").getId()));
+        q.insert(new PayeeSubstringToCategory("berlet", q.getOrCreateCategory("Monthly Bills: BKV").getId()));
+        q.insert(new PayeeSubstringToCategory("tesco", q.getOrCreateCategory("Everyday Expenses: Groceries").getId()));
+        q.insert(new PayeeSubstringToCategory("dm", q.getOrCreateCategory("Everyday Expenses: Groceries").getId()));
+	}
 
 	@Override
 	public void filter(Transaction t) {
