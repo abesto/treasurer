@@ -1,5 +1,6 @@
 package net.abesto.treasurer.upload.ynab;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class YNABUploadData {
 	public YNABUploadData(List<Transaction> transactions, List<FailedToParseSms> failedToParse) {
 		this();
 		
-		Date earliest = null, latest = null;
+		Calendar earliest = null, latest = null;
 		
 		for (Transaction t : transactions) {
 			if (t.hasCategory()) {

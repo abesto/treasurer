@@ -1,24 +1,22 @@
 package net.abesto.treasurer.model;
 
-import android.content.ContentValues;
 import android.util.Log;
-import net.abesto.treasurer.TreasurerContract;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 public class Transaction extends Model{
-	private Date date;
+	private GregorianCalendar date;
 	private String payee;
 	private Long categoryId;
 	private String memo;
 	private Integer outflow;
 	private Integer inflow;
 	
-	public Transaction(Date date, String payee, Long categoryId, String memo,
+	public Transaction(GregorianCalendar date, String payee, Long categoryId, String memo,
 			Integer outflow, Integer inflow) {
 		this.date = date;
 		this.payee = payee;
@@ -28,7 +26,7 @@ public class Transaction extends Model{
 		this.inflow = inflow;
 	}
 
-    public Date getDate() {
+    public GregorianCalendar getDate() {
 		return date;
 	}
 

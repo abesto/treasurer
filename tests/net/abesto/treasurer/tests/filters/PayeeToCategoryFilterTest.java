@@ -13,10 +13,7 @@ import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,7 +24,7 @@ public class PayeeToCategoryFilterTest {
     private Long nextRandomLong = 0L;
 
     private void assertPayeeToCategory(String payee, Long categoryId) {
-        Transaction t = new Transaction(new Date(), payee, null, null, 0, 0);
+        Transaction t = new Transaction(new GregorianCalendar(), payee, null, null, 0, 0);
         filter.filter(t);
         assertEquals(categoryId, t.getCategoryId());
     }

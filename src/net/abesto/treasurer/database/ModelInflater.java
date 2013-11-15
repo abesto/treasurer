@@ -9,6 +9,7 @@ import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.provider.Provider;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class ModelInflater {
 
     private static ContentValues deflateTransaction(Transaction obj) {
         ContentValues v = new ContentValues();
-        v.put(TreasurerContract.Transaction.DATE, obj.getDate().getTime());
+        v.put(TreasurerContract.Transaction.DATE, obj.getDate().getTime().getTime());
         v.put(TreasurerContract.Transaction.PAYEE, obj.getPayee());
         v.put(TreasurerContract.Transaction.CATEGORY_ID, obj.getCategoryId());
         v.put(TreasurerContract.Transaction.MEMO, obj.getMemo());
@@ -97,7 +98,7 @@ public class ModelInflater {
 
     private static Transaction inflateTransaction(Cursor c) {
        Transaction t = new Transaction(
-                new Date(),  // TODO
+                new GregorianCalendar(),   // TODO
                 getString(c, TreasurerContract.Transaction.PAYEE),
                 getLong(c, TreasurerContract.Transaction.CATEGORY_ID),
                 getString(c, TreasurerContract.Transaction.MEMO),
