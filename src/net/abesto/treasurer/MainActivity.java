@@ -36,7 +36,6 @@ import java.util.UUID;
 
 public class MainActivity extends ListActivity {
 	private SmsReceiver receiver;
-    private static final String otp = "+36309400700";
 
     private SimpleCursorAdapter adapter;
     private SmsParserDatabaseAdapter parser;
@@ -53,24 +52,8 @@ public class MainActivity extends ListActivity {
         Queries.initializeAppInstance(this);
         initializeListAdapter();
         initializeParser();
-        registerSmsListener();
         registerOnCreateContextMenuHandler();
         Log.i(TAG, "onCreate");
-    }
-
-    private void registerSmsListener() {
-        Set<String> wantedSenders= new HashSet<String>();
-        wantedSenders.add(otp);
-        receiver = new SmsReceiver(wantedSenders, new SmsReceiver.Handler() {
-            @Override
-            public void handle(String sms) {
-                parser.parse(sms);
-            }
-        });
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
-        registerReceiver(receiver, filter);
-        Log.i(TAG, "registered_sms_listener");
     }
 
     private void initializeParser() {
