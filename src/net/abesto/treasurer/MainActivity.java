@@ -25,9 +25,11 @@ import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import net.abesto.treasurer.provider.Provider;
 import net.abesto.treasurer.upload.*;
+import net.abesto.treasurer.upload.ynab.YNABDateFormatter;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -123,7 +125,11 @@ public class MainActivity extends ListActivity {
                     return;
                 }
 
-                contextMenu.setHeaderTitle(t.getFlow().toString() + " " + t.getCategory().getName() + " " + t.getDate());
+
+                contextMenu.setHeaderTitle(String.format("%s: %s %s",
+                        DateFormat.getDateInstance().format(t.getDate().getTime()),
+                        t.getFlow().toString(),
+                        t.getCategoryName()));
                 contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
                 contextMenu.add(Menu.NONE, 1, 1, "Cancel");
             }

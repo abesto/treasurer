@@ -52,6 +52,12 @@ public class Transaction extends Model{
         }
     }
 
+    public String getCategoryName() {
+        Category c = getCategory();
+        if (c == null) return "Unknown category";
+        return c.getName();
+    }
+
 	public String getMemo() {
 		return memo;
 	}

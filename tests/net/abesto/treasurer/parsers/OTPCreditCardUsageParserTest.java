@@ -28,6 +28,4 @@ public class OTPCreditCardUsageParserTest {
         assertEquals(4180, t.getOutflow().intValue());
         assertEquals("WWW.NETPINCER.HU etterem", t.getPayee());
     }
-
-
 }

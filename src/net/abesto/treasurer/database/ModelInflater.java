@@ -19,13 +19,15 @@ public class ModelInflater {
         return c.getString(index);
     }
 
-    private static int getInt(Cursor c, String f) {
+    private static Integer getInt(Cursor c, String f) {
         int index = getColumnIndex(c, f);
+        if (c.isNull(index)) return null;
         return c.getInt(index);
     }
 
-    private static long getLong(Cursor c, String f) {
+    private static Long getLong(Cursor c, String f) {
         int index = getColumnIndex(c, f);
+        if (c.isNull(index)) return null;
         return c.getLong(index);
     }
 
@@ -71,7 +73,7 @@ public class ModelInflater {
 
     private static ContentValues deflateTransaction(Transaction obj) {
         ContentValues v = new ContentValues();
-        v.put(TreasurerContract.Transaction.DATE, obj.getDate().getTime().getTime());
+        v.put(TreasurerContract.Transaction.DATE, obj.getDate().getTimeInMillis() / 1000);
         v.put(TreasurerContract.Transaction.PAYEE, obj.getPayee());
         v.put(TreasurerContract.Transaction.CATEGORY_ID, obj.getCategoryId());
         v.put(TreasurerContract.Transaction.MEMO, obj.getMemo());
@@ -98,7 +100,7 @@ public class ModelInflater {
 
     private static Transaction inflateTransaction(Cursor c) {
        Transaction t = new Transaction(
-                new GregorianCalendar(),   // TODO
+                new GregorianCalendar(),
                 getString(c, TreasurerContract.Transaction.PAYEE),
                 getLong(c, TreasurerContract.Transaction.CATEGORY_ID),
                 getString(c, TreasurerContract.Transaction.MEMO),
@@ -106,6 +108,7 @@ public class ModelInflater {
                 getInt(c, TreasurerContract.Transaction.INFLOW)
         );
         t.setId(getLong(c, TreasurerContract.Transaction._ID));
+        t.getDate().setTimeInMillis(getLong(c, TreasurerContract.Transaction.DATE) * 1000);
         return t;
     }
 
