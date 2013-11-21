@@ -12,9 +12,9 @@ public class YNABStringBuilder {
 	
 	public static String csvRow(Transaction t) {
 		StringBuilder s = new StringBuilder();
-		s.append(YNABDateFormatter.formatDate(t.getDate())).append(',');
+		s.append(YNABDateFormatter.formatDate(t.getDate().getTime())).append(',');
 		s.append('"').append(t.getPayee()).append('"').append(',');
-		s.append('"').append(t.getCategory()).append('"').append(',');
+		s.append('"').append(t.getCategoryName()).append('"').append(',');
 		s.append('"').append(t.getMemo()).append('"').append(',');
 		s.append(t.getOutflow()).append(',');
 		s.append(t.getInflow()).append(',');

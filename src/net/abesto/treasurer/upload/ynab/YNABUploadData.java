@@ -40,12 +40,15 @@ public class YNABUploadData {
 				latest = t.getDate();
 			}
 		}
-		
-		this.title = "Transaction report " + YNABDateFormatter.formatDate(earliest);
-		if (earliest != null && !earliest.equals(latest)) {
-			this.title += " - " + YNABDateFormatter.formatDate(latest);
-		}
-		
+
+		this.title = "Transaction report";
+		if (earliest != null) {
+            this.title += " " + YNABDateFormatter.formatDate(earliest.getTime());
+            if (!earliest.equals(latest)) {
+                this.title += " - " + YNABDateFormatter.formatDate(latest.getTime());
+            }
+        }
+
 		this.failedToParse = failedToParse;
 	}
 	

@@ -61,7 +61,16 @@ public class ModelInflater {
     public static ContentValues deflate(Class<? extends Model> cls, Model obj) {
         if (cls == Transaction.class) return deflateTransaction((Transaction) obj);
         if (cls == PayeeSubstringToCategory.class) return deflatePayeeSubstringToCategory((PayeeSubstringToCategory) obj);
+        if (cls == FailedToParseSms.class) return deflateFailedToParseSms((FailedToParseSms) obj);
         throw new IllegalArgumentException("Don't know how to deflate " + cls.toString());
+    }
+
+    private static ContentValues deflateFailedToParseSms(FailedToParseSms obj) {
+        ContentValues v = new ContentValues();
+        if (obj.getId() != null) v.put(TreasurerContract.StringSet._ID, obj.getId());
+        v.put(TreasurerContract.StringSet.SET_ID, TreasurerContract.StringSet.FAILED_TO_PARSE_SMS_SET);
+        v.put(TreasurerContract.StringSet.STRING, obj.getMessage());
+        return v;
     }
 
     private static ContentValues deflatePayeeSubstringToCategory(PayeeSubstringToCategory obj) {

@@ -84,6 +84,8 @@ public class Provider extends ContentProvider {
             if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
                 queryBuilder.appendWhere(PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment());
             }
+        } else if (uriType == STRING_SETS) {
+            queryBuilder.setTables(StringSet.TABLE_NAME);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

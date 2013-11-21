@@ -158,6 +158,7 @@ public class MainActivity extends ListActivity {
             data = UploadData.fromProvider();
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Failed to load data", e.toString());
+            Log.e(TAG, "uplaod_data_from_provider_failed", e);
             return;
         }
 
