@@ -17,7 +17,7 @@ public class OTPCreditCardUsageParser implements SmsParser {
 		return ParseResult.success(new Transaction(
 				new GregorianCalendar(
                         Integer.parseInt("20" + m.group(1)),
-                        Integer.parseInt(m.group(2)),
+                        Integer.parseInt(m.group(2)) - 1,
                         Integer.parseInt(m.group(3)),
                         Integer.parseInt(m.group(4)),
                         Integer.parseInt(m.group(5))

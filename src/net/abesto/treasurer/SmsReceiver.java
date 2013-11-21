@@ -1,6 +1,5 @@
 package net.abesto.treasurer;
 
-import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.Set;
 

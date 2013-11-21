@@ -2,11 +2,8 @@ package net.abesto.treasurer;
 
 
 import android.app.ListActivity;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -18,21 +15,15 @@ import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-import net.abesto.treasurer.model.Category;
-import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import net.abesto.treasurer.provider.Provider;
 import net.abesto.treasurer.upload.*;
-import net.abesto.treasurer.upload.ynab.YNABDateFormatter;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 public class MainActivity extends ListActivity {
 	private SmsReceiver receiver;
@@ -111,7 +102,7 @@ public class MainActivity extends ListActivity {
 
                 contextMenu.setHeaderTitle(String.format("%s: %s %s",
                         DateFormat.getDateInstance().format(t.getDate().getTime()),
-                        t.getFlow().toString(),
+                        t.getFlow(),
                         t.getCategoryName()));
                 contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
                 contextMenu.add(Menu.NONE, 1, 1, "Cancel");

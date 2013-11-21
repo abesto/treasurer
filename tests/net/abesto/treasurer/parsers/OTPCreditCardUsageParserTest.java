@@ -20,7 +20,7 @@ public class OTPCreditCardUsageParserTest {
         Transaction t = r.getTransaction();
         GregorianCalendar d = t.getDate();
         assertEquals(2013, d.get(Calendar.YEAR));
-        assertEquals(11, d.get(Calendar.MONTH));
+        assertEquals(11, d.get(Calendar.MONTH) - 1);
         assertEquals(2, d.get(Calendar.DAY_OF_MONTH));
         assertEquals(17, d.get(Calendar.HOUR_OF_DAY));
         assertEquals(24, d.get(Calendar.MINUTE));
