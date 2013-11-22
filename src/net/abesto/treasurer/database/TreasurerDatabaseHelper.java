@@ -25,4 +25,12 @@ public class TreasurerDatabaseHelper extends SQLiteOpenHelper {
         PayeeSubstringToCategoryTable.onUpgrade(sqLiteDatabase, v0, v1);
         StringSetTable.onUpgrade(sqLiteDatabase, v0, v1);
     }
+
+    @Override
+    public void onOpen(SQLiteDatabase sqLiteDatabase) {
+        super.onOpen(sqLiteDatabase);
+        if (!sqLiteDatabase.isReadOnly()) {
+            sqLiteDatabase.execSQL("PRAGMA foreign_keys=ON;");
+        }
+    }
 }

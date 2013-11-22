@@ -144,6 +144,8 @@ public class Provider extends ContentProvider {
             rowsDeleted = sqlDB.delete(Transaction.TABLE_NAME, selection, selectionArgs);
         } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
             rowsDeleted = sqlDB.delete(PayeeSubstringToCategory.TABLE_NAME, PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment(), null);
+        } else if (uriType == CATEGORY_ID) {
+            rowsDeleted = sqlDB.delete(Category.TABLE_NAME, Category._ID + "=" + uri.getLastPathSegment(), null);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -157,19 +159,25 @@ public class Provider extends ContentProvider {
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         int rowsUpdated;
         if (uriType == TRANSACTIONS) {
-            rowsUpdated = sqlDB.update(Transaction.TABLE_NAME, contentValues, selection, selectionArgs);
-        } else if (uriType == TRANSACTION_ID) {
             if (selection != null && selection.length() != 0) {
                 throw new IllegalArgumentException("Selection must be empty for update on " + uri);
             }
+            rowsUpdated = sqlDB.update(Transaction.TABLE_NAME, contentValues, selection, selectionArgs);
+        } else if (uriType == TRANSACTION_ID) {
             rowsUpdated = sqlDB.update(Transaction.TABLE_NAME,
                     contentValues,
                     Transaction.FULL_ID + "=" + uri.getLastPathSegment(),
+                    null);
+        } else if (uriType == CATEGORY_ID) {
+            rowsUpdated = sqlDB.update(Category.TABLE_NAME,
+                    contentValues,
+                    Category.FULL_ID + "=" + uri.getLastPathSegment(),
                     null);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(TRANSACTIONS_URI, null);  // Update transaction list showing category names
         return rowsUpdated;
     }
 
