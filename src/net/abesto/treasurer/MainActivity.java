@@ -169,6 +169,10 @@ public class MainActivity extends ListActivity {
                 Log.i(TAG, CategoryListActivity.TAG + " finished");
                 break;
             case REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING:
+                if (resultCode == RESULT_CANCELED) {
+                    Log.i(TAG, "category_list_cancelled");
+                    return;
+                }
                 if (!data.hasExtra(CategoryListActivity.EXTRA_CATEGORY_ID)) {
                     Log.w(TAG, "got_no_category_id_from_category_list_activity");
                     return;
@@ -179,6 +183,7 @@ public class MainActivity extends ListActivity {
                 );
                 Log.i(TAG, String.format("new_payee_substring_rule_from_transaction_longclick %s %d %s",
                         newPayeeSubstring, categoryId, retval));
+                Queries.getAppInstance().reapplyAllFilters();
                 break;
             default:
                 Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);

@@ -29,6 +29,7 @@ public class NewPayeeDialog {
             PayeeSubstringToCategory rule = new PayeeSubstringToCategory(newPayee, category.getId());
             Queries.getAppInstance().insert(rule);
             Log.i(TAG, "add_new_payee_substring_success");
+            Queries.getAppInstance().reapplyAllFilters();
         }
     }
 

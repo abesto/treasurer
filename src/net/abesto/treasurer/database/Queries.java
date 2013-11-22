@@ -3,8 +3,12 @@ package net.abesto.treasurer.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
+import net.abesto.treasurer.filters.PayeeToCategoryFilter;
+import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.Model;
+import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.provider.Provider;
 
 import java.util.*;
@@ -71,10 +75,29 @@ public class Queries {
         return uri;
     }
 
+    public <T extends Model> void update(T obj) {
+        if (!obj.isIdSet()) {
+            throw new IllegalArgumentException("Can't update an object that doesn't have an id");
+        }
+        context.getContentResolver().update(
+                Uri.withAppendedPath(ModelInflater.getUri(obj.getClass()), obj.getId().toString()),
+                ModelInflater.deflate(obj.getClass(), obj),
+                null, null
+        );
+    }
+
     public <T> int delete(Class<T> cls, Long id) {
         return context.getContentResolver().delete(
                 Uri.withAppendedPath(ModelInflater.getUri(cls), id.toString()),
                 null, null
         );
+    }
+
+    public void reapplyAllFilters() {
+        TransactionFilter filter = new PayeeToCategoryFilter();
+        for (Transaction t : list(Transaction.class)) {
+            filter.filter(t);
+            update(t);
+        }
     }
 }

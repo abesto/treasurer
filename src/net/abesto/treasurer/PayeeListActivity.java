@@ -79,6 +79,7 @@ public class PayeeListActivity extends ListActivity {
                 if (deletedRows != 1) {
                     Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
                 }
+                Queries.getAppInstance().reapplyAllFilters();
                 return true;
             }
         };

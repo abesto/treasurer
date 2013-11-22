@@ -54,7 +54,7 @@ public class ModelInflater {
                 getString(c, TreasurerContract.PayeeSubstringToCategory.PAYEE_SUBSTRING),
                 getLong(c, TreasurerContract.PayeeSubstringToCategory.CATEGORY_ID)
         );
-        p.setId(getLong(c, TreasurerContract.PayeeSubstringToCategory._ID));
+        p.setId(c.getLong(0));
         return p;
     }
 
@@ -116,7 +116,7 @@ public class ModelInflater {
                 getInt(c, TreasurerContract.Transaction.OUTFLOW),
                 getInt(c, TreasurerContract.Transaction.INFLOW)
         );
-        t.setId(getLong(c, TreasurerContract.Transaction._ID));
+        t.setId(c.getLong(0));
         t.getDate().setTimeInMillis(getLong(c, TreasurerContract.Transaction.DATE) * 1000);
         return t;
     }
@@ -125,7 +125,7 @@ public class ModelInflater {
         Category cat = new Category(
                 getString(c, TreasurerContract.Category.NAME)
         );
-        cat.setId(getLong(c, TreasurerContract.Category._ID));
+        cat.setId(c.getLong(0));
         return cat;
     }
 

@@ -159,7 +159,7 @@ public class Provider extends ContentProvider {
         if (uriType == TRANSACTIONS) {
             rowsUpdated = sqlDB.update(Transaction.TABLE_NAME, contentValues, selection, selectionArgs);
         } else if (uriType == TRANSACTION_ID) {
-            if (selection.length() != 0) {
+            if (selection != null && selection.length() != 0) {
                 throw new IllegalArgumentException("Selection must be empty for update on " + uri);
             }
             rowsUpdated = sqlDB.update(Transaction.TABLE_NAME,
