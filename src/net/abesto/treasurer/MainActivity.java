@@ -16,8 +16,6 @@ import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.model.Transaction;
-import net.abesto.treasurer.parsers.ParserFactory;
-import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import net.abesto.treasurer.provider.Provider;
 import net.abesto.treasurer.upload.*;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,10 +24,7 @@ import java.io.File;
 import java.text.DateFormat;
 
 public class MainActivity extends ListActivity {
-	private SmsReceiver receiver;
-
     private SimpleCursorAdapter adapter;
-    private SmsParserDatabaseAdapter parser;
 
     private static final String TAG = "MainActivity";
 
@@ -42,15 +37,8 @@ public class MainActivity extends ListActivity {
         UploaderFactory.initializeComponent(this);
         Queries.initializeAppInstance(this);
         initializeListAdapter();
-        initializeParser();
         registerOnCreateContextMenuHandler();
         Log.i(TAG, "onCreate");
-    }
-
-    private void initializeParser() {
-        parser = new SmsParserDatabaseAdapter(
-                ParserFactory.getInstance().buildFromConfig()
-        );
     }
 
     private void initializeListAdapter() {
@@ -186,12 +174,6 @@ public class MainActivity extends ListActivity {
 
     public void reload() {
         PayeeToCategoryFilter.loadTestData();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        this.unregisterReceiver(receiver);
     }
 
     @Override
