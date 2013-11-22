@@ -15,6 +15,7 @@ import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
+import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.provider.Provider;
 import net.abesto.treasurer.upload.*;
@@ -30,6 +31,9 @@ public class MainActivity extends ListActivity {
 
     private static final int REQUEST_CODE_LOAD = 1;
     public static final int REQUEST_CODE_PAYEE_RULES = 2;
+    public static final int REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING = 3;
+
+    private String newPayeeSubstring;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +67,8 @@ public class MainActivity extends ListActivity {
     }
 
     private void registerOnCreateContextMenuHandler() {
+        final MainActivity context = this;
+
         final MenuItem.OnMenuItemClickListener deleteClicked = new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -71,6 +77,41 @@ public class MainActivity extends ListActivity {
                 if (deletedRows != 1) {
                     Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
                 }
+                return true;
+            }
+        };
+
+        final MenuItem.OnMenuItemClickListener createRuleClicked = new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                // Default payee substring is the full payee of the selected transaction
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
+                String initialPayeeSubstring;
+                try {
+                    Transaction t = Queries.getAppInstance().get(Transaction.class, info.id);
+                    initialPayeeSubstring = t.getPayee();
+                    Log.i(TAG, String.format("clicked_add_payee_rule_from_transaction %d %s", info.id, t.getPayee()));
+                } catch (ObjectNotFoundException e) {
+                    Log.e(TAG, String.format("tarnsaction_gone_away %d", info.id), e);
+                    initialPayeeSubstring = "";
+                }
+                // Prompt the user to edit the substring
+                new NewPayeeDialog(context).show(new NewPayeeDialog.PostCreateAction() {
+                    @Override
+                    public void execute(String newPayee) {
+                        // Don't do anything if the dialog was cancelled
+                        newPayeeSubstring = newPayee;
+                        if (newPayeeSubstring == null) {
+                            Log.i(TAG, "no_payee_entered");
+                            return;
+                        }
+                        // If user pressed add, let's select a category
+                        Intent intent = new Intent(context, CategoryListActivity.class);
+                        intent.putExtra(CategoryListActivity.EXTRA_ACTION, CategoryListActivity.ACTION_CHOOSE_CATEGORY_ID);
+                        intent.putExtra(CategoryListActivity.EXTRA_CATEGORY_FOR_SUBSTRING, newPayeeSubstring);
+                        startActivityForResult(intent, REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING);
+                    }
+                }, initialPayeeSubstring);
                 return true;
             }
         };
@@ -92,8 +133,12 @@ public class MainActivity extends ListActivity {
                         DateFormat.getDateInstance().format(t.getDate().getTime()),
                         t.getFlow(),
                         t.getCategoryName()));
-                contextMenu.add(Menu.NONE, 0, 0, "Delete").setOnMenuItemClickListener(deleteClicked);
-                contextMenu.add(Menu.NONE, 1, 1, "Cancel");
+                if (t.getCategory() == null) {
+                    contextMenu.add(Menu.NONE, 0, 0, "Create category rule based on payee")
+                            .setOnMenuItemClickListener(createRuleClicked);
+                }
+                contextMenu.add(Menu.NONE, 1, 1, "Delete").setOnMenuItemClickListener(deleteClicked);
+                contextMenu.add(Menu.NONE, 2, 2, "Cancel");
             }
         };
 
@@ -122,6 +167,18 @@ public class MainActivity extends ListActivity {
         switch(requestCode) {
             case REQUEST_CODE_PAYEE_RULES:
                 Log.i(TAG, CategoryListActivity.TAG + " finished");
+                break;
+            case REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING:
+                if (!data.hasExtra(CategoryListActivity.EXTRA_CATEGORY_ID)) {
+                    Log.w(TAG, "got_no_category_id_from_category_list_activity");
+                    return;
+                }
+                Long categoryId = data.getLongExtra(CategoryListActivity.EXTRA_CATEGORY_ID, -1);
+                Object retval = Queries.getAppInstance().insert(
+                        new PayeeSubstringToCategory(newPayeeSubstring, categoryId)
+                );
+                Log.i(TAG, String.format("new_payee_substring_rule_from_transaction_longclick %s %d %s",
+                        newPayeeSubstring, categoryId, retval));
                 break;
             default:
                 Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);

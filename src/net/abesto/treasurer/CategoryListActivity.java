@@ -16,11 +16,24 @@ import org.apache.commons.lang3.ArrayUtils;
 public class CategoryListActivity extends ListActivity {
     public static final String TAG = "CategoryListActivity";
 
+    private int requestedAction;
+    public static final String EXTRA_ACTION = "action";
+    public static final String EXTRA_CATEGORY_ID = "category_id";
+    public static final String EXTRA_CATEGORY_FOR_SUBSTRING = "substring";
+
+    public static final int ACTION_EDIT_RULES = 1;
+    public static final int ACTION_CHOOSE_CATEGORY_ID = 2;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        setTitle("Treasurer > Categories");
-        Log.i(TAG, "onCreate");
+        requestedAction = getIntent().getIntExtra(EXTRA_ACTION, ACTION_EDIT_RULES);
+        if (requestedAction == ACTION_EDIT_RULES) {
+            setTitle("Treasurer > Categories");
+        } else if (requestedAction == ACTION_CHOOSE_CATEGORY_ID) {
+            setTitle(String.format("Select category for %s", getIntent().getStringExtra(EXTRA_CATEGORY_FOR_SUBSTRING)));
+        }
+        Log.i(TAG, "onCreate " + requestedAction);
 	}
 
     @Override
@@ -46,9 +59,24 @@ public class CategoryListActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Cursor cursor = (Cursor) getListView().getItemAtPosition(position);
         Category category = ModelInflater.inflate(Category.class, cursor);
+        if (requestedAction == ACTION_CHOOSE_CATEGORY_ID) {
+            returnSelectedCategory(category);
+        } else {
+            editPayeeSubstringRules(category);
+        }
+    }
+
+    private void editPayeeSubstringRules(Category category) {
         Log.i(TAG, String.format("clicked_category %d %s", category.getId(), category.getName()));
         Intent intent = new Intent(this, PayeeListActivity.class);
         intent.putExtra(PayeeListActivity.EXTRA_CATEGORY_ID, category.getId());
         startActivity(intent);
+    }
+
+    private void returnSelectedCategory(Category category) {
+        Intent output = new Intent();
+        output.putExtra(EXTRA_CATEGORY_ID, category.getId());
+        setResult(RESULT_OK, output);
+        finish();
     }
 }

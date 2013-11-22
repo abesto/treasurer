@@ -1,8 +1,6 @@
 package net.abesto.treasurer;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,18 +11,14 @@ import android.view.View;
 import android.widget.*;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
-import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.provider.Provider;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
-
 public class PayeeListActivity extends ListActivity {
     public static final String TAG = "PayeeListActivity";
     public static final String EXTRA_CATEGORY_ID = "category";
-
     private Category category;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +48,7 @@ public class PayeeListActivity extends ListActivity {
             Cursor c = getContentResolver().query(
                     Provider.PAYEE_SUBSTRING_TO_CATEGORY_URI,
                     ArrayUtils.add(columns, 0, TreasurerContract.PayeeSubstringToCategory._ID),
-                    "category_id=?", new String[] { category.getId().toString() }, null);
+                    "category_id=?", new String[] {category.getId().toString() }, null);
             setListAdapter(new SimpleCursorAdapter(
                     this, android.R.layout.simple_list_item_1, c, columns,
                     new int[] {android.R.id.text1}));
@@ -65,39 +59,11 @@ public class PayeeListActivity extends ListActivity {
         Log.i(TAG, "onResume");
     }
 
-    public void addPayee(String newPayee) {
-        PayeeSubstringToCategory rule = new PayeeSubstringToCategory(newPayee, category.getId());
-        Queries.getAppInstance().insert(rule);
-        Log.i(TAG, "add_new_payee_substring_success");
-    }
-
-    private void showNewPayeeDialog() {
-        final EditText textField = new EditText(this);
-        new AlertDialog.Builder(this)
-                .setTitle(String.format("Add new payee to %s", category.getName()))
-                .setView(textField)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String newPayee = textField.getText().toString();
-                        Log.i(TAG, String.format("entered_new_payee_substring %s", newPayee));
-                        addPayee(newPayee);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i(TAG, "cancelled_new_payee_substring_dialog");
-                    }
-                })
-                .show();
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.payee_list_action_create:
-                showNewPayeeDialog();
+                new NewPayeeDialog(this).show(new NewPayeeDialog.AddToCategory(category));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
