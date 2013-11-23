@@ -8,7 +8,8 @@ public class StringSetTable implements TreasurerContract.StringSet {
     private static final String SQL_CREATE_TABLE = "create table " + TABLE_NAME + "(" +
             _ID    + " integer primary key, " +
             SET_ID + " integer, " +
-            STRING + " text " +
+            STRING + " text, " +
+            "unique(" + SET_ID + ", " + STRING + ") on conflict ignore" +
             ")";
 
     private static final String TAG = "StringSetTable";
