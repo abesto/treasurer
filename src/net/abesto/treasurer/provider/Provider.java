@@ -84,8 +84,11 @@ public class Provider extends ContentProvider {
             if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
                 queryBuilder.appendWhere(PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment());
             }
-        } else if (uriType == STRING_SETS) {
+        } else if (uriType == STRING_SETS || uriType == STRING_SET_ID) {
             queryBuilder.setTables(StringSet.TABLE_NAME);
+            if (uriType == STRING_SET_ID) {
+                queryBuilder.appendWhere(StringSet.SET_ID + "=" + uri.getLastPathSegment());
+            }
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -146,6 +149,8 @@ public class Provider extends ContentProvider {
             rowsDeleted = sqlDB.delete(PayeeSubstringToCategory.TABLE_NAME, PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment(), null);
         } else if (uriType == CATEGORY_ID) {
             rowsDeleted = sqlDB.delete(Category.TABLE_NAME, Category._ID + "=" + uri.getLastPathSegment(), null);
+        } else if (uriType == STRING_SET_ID) {
+            rowsDeleted = sqlDB.delete(StringSet.TABLE_NAME, StringSet._ID + "=" + uri.getLastPathSegment(), null);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

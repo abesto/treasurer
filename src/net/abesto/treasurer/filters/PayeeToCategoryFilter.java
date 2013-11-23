@@ -9,6 +9,7 @@ import java.text.Normalizer;
 
 import android.util.Log;
 import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.model.UnknownPayee;
 
 public class PayeeToCategoryFilter implements TransactionFilter {
     public static final String TAG = "PayeeToCategoryFilter";
@@ -38,6 +39,15 @@ public class PayeeToCategoryFilter implements TransactionFilter {
         q.insert(new PayeeSubstringToCategory("dm", q.getOrCreateCategory("Everyday Expenses: Groceries").getId()));
 	}
 
+    public boolean isPayeeKnown(String payee) {
+        for (PayeeSubstringToCategory rule : queries.list(PayeeSubstringToCategory.class)) {
+            if (matches(payee, rule.getSubstring())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 	@Override
 	public void filter(Transaction t) {
         for (PayeeSubstringToCategory rule : queries.list(PayeeSubstringToCategory.class)) {
@@ -54,6 +64,7 @@ public class PayeeToCategoryFilter implements TransactionFilter {
             }
         }
         t.setCategoryId(null);
+        queries.insert(new UnknownPayee(t.getPayee()));
         Log.i(TAG, "no_category_found '" + t.getPayee() + '"');
 	}
 }

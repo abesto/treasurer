@@ -46,7 +46,14 @@ public class ModelInflater {
         if (cls == Transaction.class) return (T) inflateTransaction(c);
         if (cls == Category.class) return (T) inflateCategory(c);
         if (cls == PayeeSubstringToCategory.class) return (T) inflatePayeeSubstringToCategory(c);
+        if (cls == UnknownPayee.class) return (T) inflateUnknownPayee(c);
         throw new IllegalArgumentException("Don't know how to inflate " + cls.toString());
+    }
+
+    private static UnknownPayee inflateUnknownPayee(Cursor c) {
+        UnknownPayee p = new UnknownPayee(getString(c, TreasurerContract.StringSet.STRING));
+        p.setId(getLong(c, TreasurerContract.StringSet._ID));
+        return p;
     }
 
     private static PayeeSubstringToCategory inflatePayeeSubstringToCategory(Cursor c) {
@@ -62,8 +69,17 @@ public class ModelInflater {
         if (cls == Transaction.class) return deflateTransaction((Transaction) obj);
         if (cls == PayeeSubstringToCategory.class) return deflatePayeeSubstringToCategory((PayeeSubstringToCategory) obj);
         if (cls == FailedToParseSms.class) return deflateFailedToParseSms((FailedToParseSms) obj);
+        if (cls == UnknownPayee.class) return deflateUnknownPayee((UnknownPayee) obj);
         if (cls == Category.class) return deflateCategory((Category) obj);
         throw new IllegalArgumentException("Don't know how to deflate " + cls.toString());
+    }
+
+    private static ContentValues deflateUnknownPayee(UnknownPayee obj) {
+        ContentValues v = new ContentValues();
+        if (obj.getId() != null) v.put(TreasurerContract.StringSet._ID, obj.getId());
+        v.put(TreasurerContract.StringSet.SET_ID, TreasurerContract.StringSet.UNKNOWN_PAYEE_SET);
+        v.put(TreasurerContract.StringSet.STRING, obj.getPayee());
+        return v;
     }
 
     private static ContentValues deflateCategory(Category obj) {
@@ -110,6 +126,7 @@ public class ModelInflater {
     public static Uri getUri(Class cls) {
         if (cls == Category.class) return Provider.CATEGORIES_URI;
         if (cls == FailedToParseSms.class) return Provider.STRING_SET_URI;
+        if (cls == UnknownPayee.class) return Provider.STRING_SET_URI;
         if (cls == PayeeSubstringToCategory.class) return Provider.PAYEE_SUBSTRING_TO_CATEGORY_URI;
         if (cls == Transaction.class) return Provider.TRANSACTIONS_URI;
         throw new IllegalArgumentException("Don't know the ContentProvider URI for class " + cls.toString());

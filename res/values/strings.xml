@@ -10,4 +10,5 @@
     <string name="action_payee_rules">Edit payee-category rules</string>
     <string name="payee_list_new">Add a new one</string>
     <string name="action_create">Create new</string>
+    <string name="unknown_payees">Show unknown payees</string>
 </resources>

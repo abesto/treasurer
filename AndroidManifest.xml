@@ -30,6 +30,7 @@
         <activity android:name=".CategoryListActivity" />
         <activity android:name=".PayeeListActivity" />
         <activity android:name=".CreatePayeeSubstringCategoryRuleActivity" />
+        <activity android:name=".UnknownPayeeListActivity" />
 
         <provider
             android:name=".provider.Provider"

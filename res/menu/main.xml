@@ -15,8 +15,7 @@
         android:id="@+id/main_action_payee_rules"
         android:title="@string/action_payee_rules"/>
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"/>
+        android:id="@+id/action_unknown_payees"
+        android:title="@string/unknown_payees"/>
 
 </menu>

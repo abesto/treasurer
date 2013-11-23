@@ -9,6 +9,7 @@ import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.Model;
 import net.abesto.treasurer.model.Transaction;
+import net.abesto.treasurer.model.UnknownPayee;
 import net.abesto.treasurer.provider.Provider;
 
 import java.util.*;
@@ -93,11 +94,20 @@ public class Queries {
         );
     }
 
+    public <T extends Model> int delete(T obj) {
+        return delete(obj.getClass(), obj.getId());
+    }
+
     public void reapplyAllFilters() {
-        TransactionFilter filter = new PayeeToCategoryFilter();
+        PayeeToCategoryFilter filter = new PayeeToCategoryFilter();
         for (Transaction t : list(Transaction.class)) {
             filter.filter(t);
             update(t);
+        }
+        for (UnknownPayee p : list(UnknownPayee.class)) {
+            if (filter.isPayeeKnown(p.getPayee())) {
+                delete(p);
+            }
         }
     }
 }

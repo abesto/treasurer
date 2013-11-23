@@ -6,7 +6,8 @@ import net.abesto.treasurer.TreasurerContract;
 
 public class StringSetTable implements TreasurerContract.StringSet {
     private static final String SQL_CREATE_TABLE = "create table " + TABLE_NAME + "(" +
-            SET_ID + " integer primary key, " +
+            _ID    + " integer primary key, " +
+            SET_ID + " integer, " +
             STRING + " text " +
             ")";
 
