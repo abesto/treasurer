@@ -84,9 +84,8 @@ public class MainActivity extends ListActivity {
         final MenuItem.OnMenuItemClickListener createRuleClicked = new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                // Default payee substring is the full payee of the selected transaction
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
                 String initialPayeeSubstring;
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
                 try {
                     Transaction t = Queries.getAppInstance().get(Transaction.class, info.id);
                     initialPayeeSubstring = t.getPayee();
@@ -95,24 +94,30 @@ public class MainActivity extends ListActivity {
                     Log.e(TAG, String.format("tarnsaction_gone_away %d", info.id), e);
                     initialPayeeSubstring = "";
                 }
-                // Prompt the user to edit the substring
-                new NewPayeeDialog(context).show(new NewPayeeDialog.PostCreateAction() {
-                    @Override
-                    public void execute(String newPayee) {
-                        // Don't do anything if the dialog was cancelled
-                        newPayeeSubstring = newPayee;
-                        if (newPayeeSubstring == null) {
-                            Log.i(TAG, "no_payee_entered");
-                            return;
-                        }
-                        // If user pressed add, let's select a category
-                        Intent intent = new Intent(context, CategoryListActivity.class);
-                        intent.putExtra(CategoryListActivity.EXTRA_ACTION, CategoryListActivity.ACTION_CHOOSE_CATEGORY_ID);
-                        intent.putExtra(CategoryListActivity.EXTRA_CATEGORY_FOR_SUBSTRING, newPayeeSubstring);
-                        startActivityForResult(intent, REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING);
-                    }
-                }, initialPayeeSubstring);
+                Intent intent = new Intent(context, CreatePayeeSubstringCategoryRuleActivity.class);
+                intent.putExtra(CreatePayeeSubstringCategoryRuleActivity.EXTRA_INITIAL_PAYEE_SUBSTRING, initialPayeeSubstring);
+                startActivity(intent);
                 return true;
+//                // Default payee substring is the full payee of the selected transaction
+//                String initialPayeeSubstring;
+//                // Prompt the user to edit the substring
+//                new NewPayeeDialog(context).show(new NewPayeeDialog.PostCreateAction() {
+//                    @Override
+//                    public void execute(String newPayee) {
+//                        // Don't do anything if the dialog was cancelled
+//                        newPayeeSubstring = newPayee;
+//                        if (newPayeeSubstring == null) {
+//                            Log.i(TAG, "no_payee_entered");
+//                            return;
+//                        }
+//                        // If user pressed add, let's select a category
+//                        Intent intent = new Intent(context, CategoryListActivity.class);
+//                        intent.putExtra(CategoryListActivity.EXTRA_ACTION, CategoryListActivity.ACTION_CHOOSE_CATEGORY_ID);
+//                        intent.putExtra(CategoryListActivity.EXTRA_CATEGORY_FOR_SUBSTRING, newPayeeSubstring);
+//                        startActivityForResult(intent, REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING);
+//                    }
+//                }, initialPayeeSubstring);
+//                return true;
             }
         };
 

@@ -1,0 +1,189 @@
+//package net.abesto.treasurer;
+//
+//import android.app.AlertDialog;
+//import android.app.ListActivity;
+//import android.content.DialogInterface;
+//import android.content.Intent;
+//import android.database.Cursor;
+//import android.os.Bundle;
+//import android.util.Log;
+//import android.view.ContextMenu;
+//import android.view.Menu;
+//import android.view.MenuItem;
+//import android.view.View;
+//import android.widget.AdapterView;
+//import android.widget.EditText;
+//import android.widget.ListView;
+//import android.widget.SimpleCursorAdapter;
+//import net.abesto.treasurer.database.ModelInflater;
+//import net.abesto.treasurer.database.ObjectNotFoundException;
+//import net.abesto.treasurer.database.Queries;
+//import net.abesto.treasurer.model.Category;
+//import net.abesto.treasurer.provider.Provider;
+//import org.apache.commons.lang3.ArrayUtils;
+//
+//public class UnknownPayeeListActivity extends ListActivity {
+//    public static final String TAG = "UnknownPayeeListActivity";
+//
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        setTitle("Treasurer > Unknown payees");
+//        registerOnCreateContextMenuHandler();
+//        Log.i(TAG, "onCreate");
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        try {
+//            String[] columns =  new String[] { TreasurerContract.StringSet.STRING };
+//            Cursor c = getContentResolver().query(
+//                    Provider.STRING_SET_URI,
+//                    ArrayUtils.add(columns, 0, TreasurerContract.StringSet._ID),
+//                    String.format("%s = %d", TreasurerContract.StringSet.SET_ID, TreasurerContract.StringSet.UNKNOWN_PAYEE_SET),
+//                    null, null);
+//            setListAdapter(new SimpleCursorAdapter(
+//                    this, android.R.layout.simple_list_item_1, c, columns,
+//                    new int[] {android.R.id.text1}));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "failed_to_create_adapter");
+//        }
+//        Log.i(TAG, "onResume");
+//    }
+//
+//    @Override
+//    protected void onListItemClick(ListView l, View v, int position, long id) {
+//        Cursor cursor = (Cursor) getListView().getItemAtPosition(position);
+//        Category category = ModelInflater.inflate(Category.class, cursor);
+//    }
+//
+//    private void editPayeeSubstringRules(Category category) {
+//        Log.i(TAG, String.format("clicked_category %d %s", category.getId(), category.getName()));
+//        Intent intent = new Intent(this, PayeeListActivity.class);
+//        intent.putExtra(PayeeListActivity.EXTRA_CATEGORY_ID, category.getId());
+//        startActivity(intent);
+//    }
+//
+//    private void returnSelectedCategory(Category category) {
+//        Intent output = new Intent();
+//        output.putExtra(EXTRA_CATEGORY_ID, category.getId());
+//        setResult(RESULT_OK, output);
+//        finish();
+//    }
+//
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.category_list, menu);
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.category_list_action_create:
+//                final EditText textField = new EditText(this);
+//                new AlertDialog.Builder(this)
+//                        .setTitle(String.format("Create new category"))
+//                        .setView(textField)
+//                        .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                String categoryName = textField.getText().toString();
+//                                Object result = Queries.getAppInstance().insert(
+//                                        new Category(categoryName)
+//                                );
+//                                Log.i(PayeeListActivity.TAG, String.format("created_category %s %s", categoryName, result));
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                Log.i(PayeeListActivity.TAG, "cancelled_new_category_dialog");
+//                            }
+//                        })
+//                        .show();
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//    }
+//
+//    private void registerOnCreateContextMenuHandler() {
+//        final CategoryListActivity context = this;
+//
+//        final MenuItem.OnMenuItemClickListener deleteClicked = new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem menuItem) {
+//                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
+//                int deletedRows = Queries.getAppInstance().delete(Category.class, info.id);
+//                if (deletedRows != 1) {
+//                    Log.e(TAG, String.format("deleted_rows_not_1 %s %s %s", info.position, info.id, deletedRows));
+//                }
+//                Queries.getAppInstance().reapplyAllFilters();
+//                return true;
+//            }
+//        };
+//
+//        final MenuItem.OnMenuItemClickListener renameClicked = new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem menuItem) {
+//                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo();
+//                final Category c;
+//                try {
+//                    c = Queries.getAppInstance().get(Category.class, info.id);
+//                } catch (ObjectNotFoundException e) {
+//                    Log.e(TAG, "longclicked_category_not_found_in_db", e);
+//                    return false;
+//                }
+//                final EditText textField = new EditText(context);
+//                textField.setText(c.getName());
+//                new AlertDialog.Builder(context)
+//                        .setTitle(String.format("Rename category"))
+//                        .setView(textField)
+//                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                String oldName = c.getName();
+//                                c.setName(textField.getText().toString());
+//                                Queries.getAppInstance().update(c);
+//                                Log.i(PayeeListActivity.TAG, String.format("renamed_category %d %s %s",
+//                                        c.getId(), oldName, c.getName()));
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                Log.i(PayeeListActivity.TAG, "cancelled_rename_category_dialog");
+//                            }
+//                        })
+//                        .show();
+//                return true;
+//            }
+//        };
+//
+//        View.OnCreateContextMenuListener createListContextMenu = new View.OnCreateContextMenuListener() {
+//            @Override
+//            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+//                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) contextMenuInfo;
+//                Category c;
+//                try {
+//                    c = Queries.getAppInstance().get(Category.class, info.id);
+//                } catch (ObjectNotFoundException e) {
+//                    Log.e(TAG, "longclicked_category_not_found_in_db", e);
+//                    return;
+//                }
+//
+//                contextMenu.setHeaderTitle(c.getName());
+//
+//                contextMenu.add(Menu.NONE, 0, 0, "Rename").setOnMenuItemClickListener(renameClicked);
+//                contextMenu.add(Menu.NONE, 1, 1, "Delete").setOnMenuItemClickListener(deleteClicked);
+//                contextMenu.add(Menu.NONE, 2, 2, "Cancel");
+//            }
+//        };
+//
+//        getListView().setOnCreateContextMenuListener(createListContextMenu);
+//    }
+//}
+//
