@@ -30,4 +30,10 @@
     <string name="pref_transactionReportTitle_key">transactionReportTitle</string>
     <string name="transactionReportTitle">Transaction report title</string>
     <string name="pref_transactionReportTitle_default">Transaction report %1$s - %2$s</string>
+    <string name="pref_wantedSender_key">wantedSender</string>
+    <string name="wantedSenders">Wanted SMS senders</string>
+    <string name="wantedSenders_summary">Comma-separated list of phone numbers. SMS-es from these senders will be
+        processed.
+    </string>
+    <string name="pref_wantedSender_default">+36309400700</string>
 </resources>
