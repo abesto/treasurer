@@ -1,6 +1,7 @@
 package net.abesto.treasurer;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,21 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
         registerCategoryListItemClickedHandler();
         registerCreateButtonClickedHandler();
         newCategoryMenuItemBehavior = new NewCategoryMenuItemBehavior(this);
+    }
+
+    private void updateCreateButtonEnabled() {
+        updateCreateButtonEnabled(adapter.hasSelectedPosition());
+    }
+
+    private void updateCreateButtonEnabled(boolean val) {
+        Button btn = (Button) findViewById(R.id.create_payee_substring);
+        btn.setEnabled(val);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCreateButtonEnabled();
     }
 
     private void registerCreateButtonClickedHandler() {
@@ -68,7 +84,19 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listView.setSelection(position);
+                updateCreateButtonEnabled(true);
+            }
+        });
+
+        listView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateCreateButtonEnabled(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                updateCreateButtonEnabled(false);
             }
         });
     }

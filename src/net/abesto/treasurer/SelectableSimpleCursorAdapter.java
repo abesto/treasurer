@@ -32,6 +32,10 @@ public class SelectableSimpleCursorAdapter extends SimpleCursorAdapter {
         return v;
     }
 
+    public boolean hasSelectedPosition() {
+        return getSelectedPosition() != null;
+    }
+
     public Integer getSelectedPosition() {
         return selectedPosition;
     }
