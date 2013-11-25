@@ -22,7 +22,8 @@ public abstract class MailerDataProvider extends DataProvider {
 	public abstract String getAttachmentText();
 
     public String getRecipient() {
-        return context.getResources().getString(R.string.pref_emailTo_key);
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(
+                context.getResources().getString(R.string.pref_emailTo_key), "");
     }
 
     private void ensureRecipientSet() throws RecipientNotSetException {
