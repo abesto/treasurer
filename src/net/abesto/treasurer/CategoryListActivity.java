@@ -33,6 +33,8 @@ public class CategoryListActivity extends ListActivity {
     public static final int ACTION_EDIT_RULES = 1;
     public static final int ACTION_CHOOSE_CATEGORY_ID = 2;
 
+    private NewCategoryMenuItemBehavior newCategoryMenuItemBehavior;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,6 +45,7 @@ public class CategoryListActivity extends ListActivity {
             setTitle(String.format("Select category for %s", getIntent().getStringExtra(EXTRA_CATEGORY_FOR_SUBSTRING)));
         }
         registerOnCreateContextMenuHandler();
+        newCategoryMenuItemBehavior = new NewCategoryMenuItemBehavior(this);
         Log.i(TAG, "onCreate " + requestedAction);
 	}
 
@@ -92,39 +95,14 @@ public class CategoryListActivity extends ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.category_list, menu);
-        return true;
+        return newCategoryMenuItemBehavior.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.category_list_action_create:
-                final EditText textField = new EditText(this);
-                new AlertDialog.Builder(this)
-                        .setTitle(String.format("Create new category"))
-                        .setView(textField)
-                        .setPositiveButton("Create", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                String categoryName = textField.getText().toString();
-                                Object result = Queries.getAppInstance().insert(
-                                        new Category(categoryName)
-                                );
-                                Log.i(PayeeListActivity.TAG, String.format("created_category %s %s", categoryName, result));
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Log.i(PayeeListActivity.TAG, "cancelled_new_category_dialog");
-                            }
-                        })
-                        .show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        Boolean result = newCategoryMenuItemBehavior.onOptionsItemSelected(item);
+        if (result != null) return result;
+        return super.onOptionsItemSelected(item);
     }
 
     private void registerOnCreateContextMenuHandler() {

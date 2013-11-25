@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -20,6 +22,7 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
     public static final String TAG = "CreatePayeeSubstringCategoryRuleActivity";
 
     private SelectableSimpleCursorAdapter adapter;
+    private NewCategoryMenuItemBehavior newCategoryMenuItemBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,7 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
         initializeCategoryListAdapter();
         registerCategoryListItemClickedHandler();
         registerCreateButtonClickedHandler();
+        newCategoryMenuItemBehavior = new NewCategoryMenuItemBehavior(this);
     }
 
     private void registerCreateButtonClickedHandler() {
@@ -92,5 +96,17 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
 
     private ListView getListView() {
         return (ListView) findViewById(R.id.categories);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return newCategoryMenuItemBehavior.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Boolean result = newCategoryMenuItemBehavior.onOptionsItemSelected(item);
+        if (result != null) return result;
+        return super.onOptionsItemSelected(item);
     }
 }
