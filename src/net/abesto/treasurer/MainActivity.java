@@ -5,6 +5,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -31,9 +32,6 @@ public class MainActivity extends ListActivity {
 
     private static final int REQUEST_CODE_LOAD = 1;
     public static final int REQUEST_CODE_PAYEE_RULES = 2;
-    public static final int REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING = 3;
-
-    private String newPayeeSubstring;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -153,23 +151,6 @@ public class MainActivity extends ListActivity {
             case REQUEST_CODE_PAYEE_RULES:
                 Log.i(TAG, CategoryListActivity.TAG + " finished");
                 break;
-            case REQUEST_CODE_CATEGORY_FOR_NEW_PAYEE_SUBSTRING:
-                if (resultCode == RESULT_CANCELED) {
-                    Log.i(TAG, "category_list_cancelled");
-                    return;
-                }
-                if (!data.hasExtra(CategoryListActivity.EXTRA_CATEGORY_ID)) {
-                    Log.w(TAG, "got_no_category_id_from_category_list_activity");
-                    return;
-                }
-                Long categoryId = data.getLongExtra(CategoryListActivity.EXTRA_CATEGORY_ID, -1);
-                Object retval = Queries.getAppInstance().insert(
-                        new PayeeSubstringToCategory(newPayeeSubstring, categoryId)
-                );
-                Log.i(TAG, String.format("new_payee_substring_rule_from_transaction_longclick %s %d %s",
-                        newPayeeSubstring, categoryId, retval));
-                Queries.getAppInstance().reapplyAllFilters();
-                break;
             default:
                 Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);
         }
@@ -202,9 +183,7 @@ public class MainActivity extends ListActivity {
             return;
         }
 
-        UploadAsyncTask uploadTask = new UploadAsyncTask(this, UploaderFactory.getInstance().build(
-                UploaderFactory.UploaderFormat.YNAB, UploaderFactory.UploaderType.MAIL, data
-        ));
+        UploadAsyncTask uploadTask = new UploadAsyncTask(this, UploaderFactory.getInstance().buildFromConfig(data));
         uploadTask.execute();
     }
 
@@ -243,6 +222,8 @@ public class MainActivity extends ListActivity {
                 return true;
             case R.id.action_unknown_payees:
                 startActivity(new Intent(this, UnknownPayeeListActivity.class));
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }

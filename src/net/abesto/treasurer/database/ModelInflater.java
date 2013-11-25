@@ -47,7 +47,14 @@ public class ModelInflater {
         if (cls == Category.class) return (T) inflateCategory(c);
         if (cls == PayeeSubstringToCategory.class) return (T) inflatePayeeSubstringToCategory(c);
         if (cls == UnknownPayee.class) return (T) inflateUnknownPayee(c);
+        if (cls == FailedToParseSms.class) return (T) inflateFailedToParseSms(c);
         throw new IllegalArgumentException("Don't know how to inflate " + cls.toString());
+    }
+
+    private static FailedToParseSms inflateFailedToParseSms(Cursor c) {
+        FailedToParseSms s = new FailedToParseSms(getString(c, TreasurerContract.StringSet.STRING));
+        s.setId(getLong(c, TreasurerContract.StringSet._ID));
+        return s;
     }
 
     private static UnknownPayee inflateUnknownPayee(Cursor c) {

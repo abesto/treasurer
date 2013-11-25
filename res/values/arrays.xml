@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="senderTypes">
+        <item>@string/pref_senderType_emailName</item>
+        <item>@string/pref_senderType_pastebinName</item>
+    </string-array>
+    <string-array name="senderTypeValues">
+        <item>@string/pref_senderType_emailValue</item>
+        <item>@string/pref_senderType_pastebinValue</item>
+    </string-array>
+</resources>

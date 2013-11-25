@@ -12,4 +12,14 @@
     <string name="action_create_category">New category</string>
     <string name="unknown_payees">Show unknown payees</string>
     <string name="action_create_payee">New payee</string>
+    <string name="sender">Upload method</string>
+    <string name="sender_summary">Method to use for uploading / sending transaction data</string>
+    <string name="sender_mail">E-mail</string>
+    <string name="sender_pastebin">Pastebin</string>
+    <string name="pref_senderType_key">senderType</string>
+    <string name="pref_senderType_default">@string/pref_senderType_emailValue</string>
+    <string name="pref_senderType_emailValue">email</string>
+    <string name="pref_senderType_pastebinValue">pastebin</string>
+    <string name="pref_senderType_emailName">E-Mail</string>
+    <string name="pref_senderType_pastebinName">Pastebin</string>
 </resources>

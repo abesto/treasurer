@@ -16,9 +16,8 @@ public class PastebinUploader extends Uploader<PastebinUploaderDataProvider> {
 		super(dataProvider);
 	}
 
-	private PastebinUploaderDataProvider dataProvider;
 	private DefaultHttpClient http = new DefaultHttpClient();
-	private String apiKey = "44ad5ad2f24bca7151918c453be5b8c1";
+	private final String apiKey = "44ad5ad2f24bca7151918c453be5b8c1";
 	
 	private String post(String text) throws UploadFailed {
 		HttpPost post = new HttpPost("http://pastebin.com/api/api_post.php");

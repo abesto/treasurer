@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="@string/pref_senderType_key"
+        android:title="@string/sender"
+        android:summary="@string/sender_summary"
+        android:defaultValue="@string/pref_senderType_default"
+        android:entries="@array/senderTypes"
+        android:entryValues="@array/senderTypeValues"/>
+</PreferenceScreen>
