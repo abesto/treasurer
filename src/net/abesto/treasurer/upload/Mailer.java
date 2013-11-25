@@ -1,13 +1,12 @@
 package net.abesto.treasurer.upload;
 
+import android.content.Intent;
+import android.net.Uri;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-
-import net.abesto.treasurer.upload.Uploader;
-import android.content.Intent;
-import android.net.Uri;
 
 public class Mailer extends Uploader<MailerDataProvider> {
 	public Mailer(MailerDataProvider dataProvider) {
@@ -26,7 +25,7 @@ public class Mailer extends Uploader<MailerDataProvider> {
 		}
 		
 		i.setType("message/rfc822");
-		i.putExtra(Intent.EXTRA_EMAIL, new String[]{"abesto0@gmail.com"});
+		i.putExtra(Intent.EXTRA_EMAIL, new String[]{dataProvider.getRecipient()});
 		i.putExtra(Intent.EXTRA_SUBJECT, dataProvider.getTitle());
 		i.putExtra(Intent.EXTRA_TEXT, dataProvider.getBody());
 		i.putExtra(Intent.EXTRA_STREAM, attachmentUri);

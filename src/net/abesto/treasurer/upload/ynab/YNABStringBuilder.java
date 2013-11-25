@@ -1,11 +1,11 @@
 package net.abesto.treasurer.upload.ynab;
 
+import net.abesto.treasurer.model.FailedToParseSms;
+import net.abesto.treasurer.model.Transaction;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import net.abesto.treasurer.model.FailedToParseSms;
-import net.abesto.treasurer.model.Transaction;
 
 public class YNABStringBuilder {
 	private static final String csvHeader = "Date,Payee,Category,Memo,Outflow,Inflow";

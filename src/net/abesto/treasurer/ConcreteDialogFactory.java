@@ -2,9 +2,7 @@ package net.abesto.treasurer;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
-import android.widget.EditText;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;

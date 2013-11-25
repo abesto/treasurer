@@ -1,25 +1,14 @@
 package net.abesto.treasurer;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import net.abesto.treasurer.database.ModelInflater;
-import net.abesto.treasurer.database.ObjectNotFoundException;
-import net.abesto.treasurer.database.Queries;
-import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.provider.Provider;
 import org.apache.commons.lang3.ArrayUtils;
 

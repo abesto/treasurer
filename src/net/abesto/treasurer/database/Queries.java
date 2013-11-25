@@ -3,16 +3,14 @@ package net.abesto.treasurer.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-import net.abesto.treasurer.filters.TransactionFilter;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.Model;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.model.UnknownPayee;
 import net.abesto.treasurer.provider.Provider;
 
-import java.util.*;
+import java.util.List;
 
 public class Queries {
     private Context context;

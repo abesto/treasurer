@@ -21,7 +21,7 @@ public class UploaderFactory {
     public enum UploaderFormat {YNAB}
     public enum UploaderType {PASTEBIN, MAIL}
 
-    public Uploader build(UploaderFormat format, UploaderType uploader, UploadData data) {
+    public Uploader build(UploaderFormat format, UploaderType uploader, UploadData data) throws DataProvider.InvalidConfigurationException {
         switch(format) {
             case YNAB: switch(uploader) {
                 case MAIL:
@@ -33,7 +33,7 @@ public class UploaderFactory {
         return null;
     }
 
-    public Uploader buildFromConfig(UploadData data) {
+    public Uploader buildFromConfig(UploadData data) throws DataProvider.InvalidConfigurationException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Resources res = context.getResources();
         UploaderFormat format = UploaderFormat.YNAB;

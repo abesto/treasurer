@@ -7,9 +7,9 @@ import net.abesto.treasurer.upload.UploadData;
 public class YNABMailerDataProvider extends MailerDataProvider {
 	private YNABUploadData data;
 	
-	public YNABMailerDataProvider(Context context, UploadData uploadData) {
+	public YNABMailerDataProvider(Context context, UploadData uploadData) throws InvalidConfigurationException {
 		super(context, uploadData);
-		data = YNABUploadData.fromUploadData(uploadData);
+		data = new YNABUploadData(context, uploadData);
 	}
 
 	@Override

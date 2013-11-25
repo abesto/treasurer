@@ -7,9 +7,9 @@ import net.abesto.treasurer.upload.UploadData;
 public class YNABPastebinUploaderDataProvider extends PastebinUploaderDataProvider {
 	private YNABUploadData data;
 	
-	public YNABPastebinUploaderDataProvider(Context context, UploadData uploadData) {
+	public YNABPastebinUploaderDataProvider(Context context, UploadData uploadData) throws InvalidConfigurationException {
 		super(context, uploadData);
-		data = YNABUploadData.fromUploadData(uploadData);
+		data = new YNABUploadData(context, uploadData);
 	}
 	
 	@Override

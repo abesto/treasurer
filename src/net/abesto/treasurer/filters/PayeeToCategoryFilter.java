@@ -1,15 +1,14 @@
 package net.abesto.treasurer.filters;
 
+import android.util.Log;
 import net.abesto.treasurer.database.ObjectNotFoundException;
+import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
+import net.abesto.treasurer.model.UnknownPayee;
 
 import java.text.Normalizer;
-
-import android.util.Log;
-import net.abesto.treasurer.database.Queries;
-import net.abesto.treasurer.model.UnknownPayee;
 
 public class PayeeToCategoryFilter implements TransactionFilter {
     public static final String TAG = "PayeeToCategoryFilter";

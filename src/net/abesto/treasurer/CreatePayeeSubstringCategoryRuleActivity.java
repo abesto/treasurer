@@ -1,7 +1,6 @@
 package net.abesto.treasurer;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;

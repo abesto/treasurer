@@ -8,4 +8,12 @@
         android:defaultValue="@string/pref_senderType_default"
         android:entries="@array/senderTypes"
         android:entryValues="@array/senderTypeValues"/>
+    <EditTextPreference
+        android:key="@string/pref_emailTo_key"
+        android:title="@string/emailTo"
+        android:defaultValue=""/>
+    <EditTextPreference
+        android:key="@string/pref_transactionReportTitle_key"
+        android:title="@string/transactionReportTitle"
+        android:defaultValue="@string/pref_transactionReportTitle_default"/>
 </PreferenceScreen>

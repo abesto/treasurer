@@ -5,7 +5,6 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -16,10 +15,12 @@ import android.widget.SimpleCursorAdapter;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-import net.abesto.treasurer.model.PayeeSubstringToCategory;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.provider.Provider;
-import net.abesto.treasurer.upload.*;
+import net.abesto.treasurer.upload.DataProvider;
+import net.abesto.treasurer.upload.UploadAsyncTask;
+import net.abesto.treasurer.upload.UploadData;
+import net.abesto.treasurer.upload.UploaderFactory;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
@@ -183,8 +184,13 @@ public class MainActivity extends ListActivity {
             return;
         }
 
-        UploadAsyncTask uploadTask = new UploadAsyncTask(this, UploaderFactory.getInstance().buildFromConfig(data));
-        uploadTask.execute();
+        try {
+            UploadAsyncTask uploadTask = new UploadAsyncTask(this, UploaderFactory.getInstance().buildFromConfig(data));
+            uploadTask.execute();
+        } catch (DataProvider.InvalidConfigurationException e) {
+            SimpleAlertDialog.show(this, "Upload failed", e.getMessage());
+            Log.e(TAG, "upload_failed", e);
+        }
     }
 
     private void removeCacheFiles() {

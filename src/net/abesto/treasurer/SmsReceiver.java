@@ -1,8 +1,5 @@
 package net.abesto.treasurer;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +9,9 @@ import android.util.Log;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParser;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class SmsReceiver extends BroadcastReceiver {
     private static final String otp = "+36309400700";

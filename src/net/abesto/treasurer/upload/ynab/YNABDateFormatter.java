@@ -1,10 +1,10 @@
 package net.abesto.treasurer.upload.ynab;
 
+import android.annotation.SuppressLint;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import android.annotation.SuppressLint;
 
 public class YNABDateFormatter {
 	@SuppressLint("SimpleDateFormat")
