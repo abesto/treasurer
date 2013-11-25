@@ -9,6 +9,7 @@
     <string name="action_send">Send</string>
     <string name="action_payee_rules">Edit payee-category rules</string>
     <string name="payee_list_new">Add a new one</string>
-    <string name="action_create">New category</string>
+    <string name="action_create_category">New category</string>
     <string name="unknown_payees">Show unknown payees</string>
+    <string name="action_create_payee">New payee</string>
 </resources>

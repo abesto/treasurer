@@ -13,7 +13,7 @@ public class NewCategoryMenuItemBehavior {
 
     public Boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.category_list_action_create) {
-            new NewCategoryDialog(activity).show();
+            new ConcreteDialogFactory(activity).newCategoryDialog().show();
             return true;
         }
         return null;

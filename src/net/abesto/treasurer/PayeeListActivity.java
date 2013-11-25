@@ -63,7 +63,7 @@ public class PayeeListActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.payee_list_action_create:
-                new NewPayeeDialog(this).show(new NewPayeeDialog.AddToCategory(category));
+                new ConcreteDialogFactory(this).newPayeeDialog(category).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

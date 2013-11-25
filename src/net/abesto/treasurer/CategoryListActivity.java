@@ -132,24 +132,20 @@ public class CategoryListActivity extends ListActivity {
                     Log.e(TAG, "longclicked_category_not_found_in_db", e);
                     return false;
                 }
-                final EditText textField = new EditText(context);
-                textField.setText(c.getName());
-                new AlertDialog.Builder(context)
-                        .setTitle(String.format("Rename category"))
-                        .setView(textField)
-                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                new TextInputDialogBuilder(context, "Rename category")
+                        .setPositiveButton("Save", new TextInputDialogBuilder.OnPositiveClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                            public void onClick(String newName) {
                                 String oldName = c.getName();
-                                c.setName(textField.getText().toString());
+                                c.setName(newName);
                                 Queries.getAppInstance().update(c);
                                 Log.i(PayeeListActivity.TAG, String.format("renamed_category %d %s %s",
                                         c.getId(), oldName, c.getName()));
                             }
                         })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton("Cancel", new TextInputDialogBuilder.OnNegativeClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                            public void onClick() {
                                 Log.i(PayeeListActivity.TAG, "cancelled_rename_category_dialog");
                             }
                         })
