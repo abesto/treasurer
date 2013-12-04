@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.DatePicker;
 import net.abesto.treasurer.parsers.ParserFactory;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -82,14 +84,14 @@ public class LoadActivity extends Activity {
 
             @Override
             protected Void doInBackground(Void... params) {
-                List<String> messages = loadMessagesBetween(
+                List<Pair<String, GregorianCalendar>> messages = loadMessagesBetween(
                         getCalendarFromDatePicker(R.id.date_from),
                         getCalendarFromDatePicker(R.id.date_until)
                 );
                 progressDialog.setMax(messages.size());
                 progressDialog.setIndeterminate(false);
-                for (String sms : messages) {
-                    parser.parse(sms);
+                for (Pair<String, GregorianCalendar> sms : messages) {
+                    parser.parse(sms.first, sms.second);
                     publishProgress(1);
                 }
                 return null;
@@ -114,13 +116,13 @@ public class LoadActivity extends Activity {
         loadTask.execute();
     }
 
-    private List<String> loadMessagesBetween(Calendar from, Calendar to) {
-        ArrayList<String> messages = new ArrayList<String>();
+    private List<Pair<String, GregorianCalendar>> loadMessagesBetween(Calendar from, Calendar to) {
+        ArrayList<Pair<String, GregorianCalendar>> messages = new ArrayList<Pair<String, GregorianCalendar>>();
         Log.i(TAG, "loading_smses_between " + DateFormatUtils.ISO_DATE_FORMAT.format(from)
                 + " " + DateFormatUtils.ISO_DATE_FORMAT.format(to));
 
         final String[] projection =
-                new String[] { "body" };
+                new String[] { "body", "date" };
         String selection = "address = ? AND date > ? AND date < ?";
         String otp = "+36309400700";
         String[] selectionArgs = new String[]{otp,
@@ -141,7 +143,9 @@ public class LoadActivity extends Activity {
                 int count = cursor.getCount();
                 if (count > 0) {
                     while (cursor.moveToNext()) {
-                        messages.add(cursor.getString(0));
+                        GregorianCalendar sent = new GregorianCalendar();
+                        sent.setTimeInMillis(cursor.getLong(1));
+                        messages.add(new Pair<String, GregorianCalendar>(cursor.getString(0), sent));
                     }
                 }
             } finally {

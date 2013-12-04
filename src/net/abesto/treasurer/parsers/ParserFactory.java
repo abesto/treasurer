@@ -15,7 +15,7 @@ public class ParserFactory {
     public SmsParser buildFromConfig() {
         // Will build a parser based on settings once said settings exist
         return new ParserWithFilters(
-                new OTPCreditCardUsageParser(),
+                new OTPCreditCardPaymentParser(),
                 new PayeeToCategoryFilter());
     }
 }

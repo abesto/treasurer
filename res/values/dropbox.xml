@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Yes, these are real. You're welcome to not abuse them. -->
+    <string name="dropbox_key">8u48pju53endcpa</string>
+    <string name="dropbox_secret">d81dhjg6dvm2gwb</string>
+</resources>

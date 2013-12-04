@@ -5,6 +5,8 @@ import android.util.Log;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.FailedToParseSms;
 
+import java.util.GregorianCalendar;
+
 public class SmsParserDatabaseAdapter implements SmsParser {
     private SmsParser parser;
     public static final String TAG = "SmsParserDatabaseAdapter";
@@ -14,9 +16,9 @@ public class SmsParserDatabaseAdapter implements SmsParser {
     }
 
     @Override
-    public ParseResult parse(String sms) {
+    public ParseResult parse(String sms, GregorianCalendar sent) {
         Log.i(TAG, "parse " + sms);
-        ParseResult r = parser.parse(sms);
+        ParseResult r = parser.parse(sms, sent);
         if (r.isSuccess()) {
             Log.i(TAG, "parse_success " + r.getTransaction());
             try {

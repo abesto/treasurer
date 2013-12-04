@@ -14,6 +14,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,9 +51,11 @@ public class SmsReceiver extends BroadcastReceiver {
                         msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
                         msgFrom = msgs[i].getOriginatingAddress();
                         String msgBody = msgs[i].getMessageBody();
+                        GregorianCalendar sent = new GregorianCalendar();
+                        sent.setTimeInMillis(msgs[i].getTimestampMillis());
                         if (wantedSenders.contains(msgFrom)) {
                             Log.i(TAG, "received_sms " + msgFrom + " " + msgBody);
-                            getParser().parse(msgBody);
+                            getParser().parse(msgBody, sent);
                         }
                     }
                 } catch(Exception e){

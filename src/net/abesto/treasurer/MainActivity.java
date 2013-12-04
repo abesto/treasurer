@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
+import com.dropbox.sync.android.DbxAccountManager;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.filters.PayeeToCategoryFilter;
@@ -32,7 +33,8 @@ public class MainActivity extends ListActivity {
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_CODE_LOAD = 1;
-    public static final int REQUEST_CODE_PAYEE_RULES = 2;
+    private static final int REQUEST_CODE_PAYEE_RULES = 2;
+    private static final int REQUEST_CODE_LINK_DROPBOX = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,8 @@ public class MainActivity extends ListActivity {
         Queries.initializeAppInstance(this);
         initializeListAdapter();
         registerOnCreateContextMenuHandler();
+        TransactionListToDropboxSync.initializeComponent(this);
+        TransactionListToDropboxSync.register("ynab-transactions.csv");
         Log.i(TAG, "onCreate");
     }
 
@@ -152,6 +156,9 @@ public class MainActivity extends ListActivity {
             case REQUEST_CODE_PAYEE_RULES:
                 Log.i(TAG, CategoryListActivity.TAG + " finished");
                 break;
+            case REQUEST_CODE_LINK_DROPBOX:
+                Log.i(TAG, "dropbox_link_done " + resultCode);
+                break;
             default:
                 Log.w("MainActivity.onActivityResult", "Unknown request code " + requestCode);
         }
@@ -208,6 +215,10 @@ public class MainActivity extends ListActivity {
         PayeeToCategoryFilter.loadTestData();
     }
 
+    private void linkDropboxAccount() {
+        DbxAccountManagerFactory.build(getApplicationContext()).startLink(this, REQUEST_CODE_LINK_DROPBOX);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -225,6 +236,9 @@ public class MainActivity extends ListActivity {
                 return true;
             case R.id.main_action_send:
                 sendTransactions();
+                return true;
+            case R.id.main_action_link_dropbox:
+                linkDropboxAccount();
                 return true;
             case R.id.action_unknown_payees:
                 startActivity(new Intent(this, UnknownPayeeListActivity.class));

@@ -9,6 +9,9 @@
         android:id="@+id/main_action_load"
         android:title="@string/action_load"/>
     <item
+        android:id="@+id/main_action_link_dropbox"
+        android:title="@string/action_link_dropbox"/>
+    <item
         android:id="@+id/main_action_reload"
         android:title="@string/action_reload"/>
     <item

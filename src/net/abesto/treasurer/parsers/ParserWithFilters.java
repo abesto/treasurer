@@ -2,6 +2,8 @@ package net.abesto.treasurer.parsers;
 
 import net.abesto.treasurer.filters.TransactionFilter;
 
+import java.util.GregorianCalendar;
+
 public class ParserWithFilters implements SmsParser {
     private SmsParser parser;
     private TransactionFilter[] filters;
@@ -12,8 +14,8 @@ public class ParserWithFilters implements SmsParser {
     }
 
     @Override
-    public ParseResult parse(String sms) {
-        ParseResult r = parser.parse(sms);
+    public ParseResult parse(String sms, GregorianCalendar sent) {
+        ParseResult r = parser.parse(sms, sent);
         if (r.isSuccess()) {
             for (TransactionFilter f : filters) {
                 f.filter(r.getTransaction());
