@@ -22,7 +22,8 @@
         android:id="@+id/categories"
         android:choiceMode="singleChoice"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" />
+        android:layout_width="match_parent"
+        android:layout_weight="1.0"/>
     <Button
         android:id="@+id/create_payee_substring"
         android:text="Create"
