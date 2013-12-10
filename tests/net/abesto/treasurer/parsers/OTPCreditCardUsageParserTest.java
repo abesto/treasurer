@@ -27,4 +27,11 @@ public class OTPCreditCardUsageParserTest {
         assertEquals(4180, t.getOutflow().intValue());
         assertEquals("WWW.NETPINCER.HU etterem", t.getPayee());
     }
+
+    @Test
+    public void testRegression() {
+        SmsParser p = new OTPCreditCardPaymentParser();
+        ParseResult r;
+        //r = p.parse("131206 09:54 Kàrtyàs vàsàrlàs/zàrolàs: -29.867 HUF; ONLINE ?GYF?LSZOLG.,BI; Kàrtyaszàm: ...5918; Egyenleg: 123.456 HUF - OTPdirekt")
+    }
 }

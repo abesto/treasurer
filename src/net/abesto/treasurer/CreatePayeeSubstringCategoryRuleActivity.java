@@ -36,7 +36,7 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
     }
 
     private void updateCreateButtonEnabled() {
-        updateCreateButtonEnabled(adapter.hasSelectedPosition());
+        updateCreateButtonEnabled(adapter.hasCheckedPosition(getListView()));
     }
 
     private void updateCreateButtonEnabled(boolean val) {
@@ -56,10 +56,10 @@ public class CreatePayeeSubstringCategoryRuleActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Queries q = Queries.getAppInstance();
-                ListView categoryList = (ListView) findViewById(R.id.categories);
+                ListView categoryList = getListView();
                 TextView payeeTextView = getPayeeTextView();
-                Integer selectedPosition = adapter.getSelectedPosition();
-                if (selectedPosition == null) return;
+                if (!adapter.hasCheckedPosition(categoryList)) return;
+                Integer selectedPosition = adapter.getCheckedPosition(categoryList);
                 Cursor c = (Cursor) categoryList.getItemAtPosition(selectedPosition);
                 q.insert(new PayeeSubstringToCategory(payeeTextView.getText().toString(), c.getLong(0)));
                 q.reapplyAllFilters();
