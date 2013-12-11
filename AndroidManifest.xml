@@ -31,8 +31,8 @@
         <activity android:name=".CategoryListActivity" />
         <activity android:name=".PayeeListActivity" />
         <activity android:name=".CreatePayeeSubstringCategoryRuleActivity" />
-        <activity android:name=".UnknownPayeeListActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".ui.activities.UnknownPayeeListActivity" />
+        <activity android:name=".ui.activities.SettingsActivity" />
 
         <provider
             android:name=".provider.Provider"
@@ -56,6 +56,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.activities.UnknownPayeeListActivity"/>
+
         <service
             android:name="com.dropbox.sync.android.DbxSyncService"
             android:enabled="true"

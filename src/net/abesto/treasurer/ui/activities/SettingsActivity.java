@@ -1,7 +1,8 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui.activities;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import net.abesto.treasurer.ui.fragments.SettingsFragment;
 
 public class SettingsActivity extends PreferenceActivity {
     @Override
