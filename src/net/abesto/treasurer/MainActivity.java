@@ -2,6 +2,7 @@ package net.abesto.treasurer;
 
 
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -166,13 +167,24 @@ public class MainActivity extends ListActivity {
 
     public void clear() {
         Log.d(TAG, "clear_clicked");
-        try {
-            getContentResolver().delete(Provider.TRANSACTIONS_URI, null, null);
-            Log.i(TAG, "cleared_transaction_list");
-        } catch (Exception e) {
-            Log.e(TAG, "clear_transation_list_failed", e);
-            SimpleAlertDialog.show(this, "Failed to clear transaction list", e.toString());
-        }
+        final MainActivity context = this;
+        new SimpleAlertDialog(this, "Clear all transactions",
+                "This will remove all transactions from the list. There's no undo functionality.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            getContentResolver().delete(Provider.TRANSACTIONS_URI, null, null);
+                            Log.i(TAG, "cleared_transaction_list");
+                        } catch (Exception e) {
+                            Log.e(TAG, "clear_transation_list_failed", e);
+                            SimpleAlertDialog.show(context, "Failed to clear transaction list", e.toString());
+                        }
+                    }
+                })
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .show();
     }
 	
     public void sendTransactions() {

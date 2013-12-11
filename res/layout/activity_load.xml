@@ -1,38 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="7dip">
     <TextView
-        android:text="Load starting at:"
+        android:text="Load from"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
     <DatePicker
         android:id="@+id/date_from"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:calendarViewShown="false"/>
     <TextView
-        android:text="Load up to:"
+        android:text="Load until (including)"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
     <DatePicker
         android:id="@+id/date_until"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
-    <LinearLayout
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/load"
-            android:text="Load"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:onClick="onLoadClicked"/>
-        <Button
-            android:id="@+id/cancel"
-            android:text="Cancel"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:onClick="onCancelClicked"/>
-    </LinearLayout>
+        android:layout_width="wrap_content"
+        android:calendarViewShown="false"/>
 </LinearLayout>

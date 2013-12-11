@@ -7,4 +7,6 @@
     android:textAppearance="?android:attr/textAppearanceLarge"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:padding="6dp" />
+    android:padding="6dp"
+    android:background="?android:attr/activatedBackgroundIndicator" />
+

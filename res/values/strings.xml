@@ -3,7 +3,7 @@
 
     <string name="app_name">Treasurer</string>
     <string name="action_settings">Settings</string>
-    <string name="action_load">Load</string>
+    <string name="action_load">Load from old messages</string>
     <string name="action_reload">Load test data</string>
     <string name="action_clear">Clear</string>
     <string name="action_send">Send</string>

@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import net.abesto.treasurer.parsers.ParserFactory;
@@ -70,7 +72,7 @@ public class LoadActivity extends Activity {
                 cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
     }
 
-    public void onLoadClicked(@SuppressWarnings("UnusedParameters") View v) {
+    private void onLoadClicked() {
         Log.d(TAG, "load_clicked");
         AsyncTask<Void, Integer, Void> loadTask = new AsyncTask<Void, Integer, Void>(){
             @Override
@@ -154,5 +156,22 @@ public class LoadActivity extends Activity {
         }
         Log.i(TAG, "loaded_sms_count " + messages.size());
         return messages;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.load, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.load_action_load:
+                onLoadClicked();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
