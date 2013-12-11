@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="net.abesto.treasurer.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,15 +27,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoadActivity" />
-        <activity android:name=".CategoryListActivity" />
-        <activity android:name=".PayeeListActivity" />
-        <activity android:name=".CreatePayeeSubstringCategoryRuleActivity" />
+        <activity android:name=".ui.activities.LoadActivity" />
+        <activity android:name=".ui.activities.CategoryListActivity" />
+        <activity android:name=".ui.activities.PayeeListActivity" />
+        <activity android:name=".ui.activities.CreatePayeeSubstringCategoryRuleActivity" />
         <activity android:name=".ui.activities.UnknownPayeeListActivity" />
         <activity android:name=".ui.activities.SettingsActivity" />
 
         <provider
-            android:name=".provider.Provider"
+            android:name=".database.Provider"
             android:authorities="net.abesto.treasurer.provider" />
 
         <receiver android:name=".SmsReceiver">

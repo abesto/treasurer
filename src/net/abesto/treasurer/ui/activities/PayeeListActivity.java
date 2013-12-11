@@ -1,4 +1,4 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui.activities;
 
 import android.app.ListActivity;
 import android.database.Cursor;
@@ -10,11 +10,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
+import net.abesto.treasurer.ui.ConcreteDialogFactory;
+import net.abesto.treasurer.R;
+import net.abesto.treasurer.ui.SimpleAlertDialog;
+import net.abesto.treasurer.TreasurerContract;
 import net.abesto.treasurer.database.ObjectNotFoundException;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
-import net.abesto.treasurer.provider.Provider;
+import net.abesto.treasurer.database.Provider;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class PayeeListActivity extends ListActivity {

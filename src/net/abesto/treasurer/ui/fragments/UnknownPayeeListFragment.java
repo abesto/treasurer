@@ -10,13 +10,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import net.abesto.treasurer.CreatePayeeSubstringCategoryRuleActivity;
+import net.abesto.treasurer.ui.activities.CreatePayeeSubstringCategoryRuleActivity;
 import net.abesto.treasurer.TreasurerContract;
-import net.abesto.treasurer.provider.Provider;
-import org.apache.commons.lang3.ArrayUtils;
+import net.abesto.treasurer.database.Provider;
 
 public class UnknownPayeeListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String TAG = "UnknownPayeeListFragment";
@@ -26,8 +24,8 @@ public class UnknownPayeeListFragment extends ListFragment implements LoaderMana
     private SimpleCursorAdapter adapter;
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onActivityCreated(Bundle b) {
+        super.onActivityCreated(b);
         try {
             getLoaderManager().initLoader(LOADER_ID, null, this);
             adapter =  new SimpleCursorAdapter(
@@ -35,10 +33,9 @@ public class UnknownPayeeListFragment extends ListFragment implements LoaderMana
                     columns, new int[]{android.R.id.text1}, 0);
             setListAdapter(adapter);
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "failed_to_create_adapter");
+            Log.e(TAG, "failed_to_create_adapter", e);
         }
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "onActivityCreated");
     }
 
     @Override
@@ -52,7 +49,6 @@ public class UnknownPayeeListFragment extends ListFragment implements LoaderMana
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.i(TAG, "onCreateLoader");
         if (id != LOADER_ID) throw new RuntimeException("Unknown loader id " + id);
         return new CursorLoader(getActivity(),
                 Uri.withAppendedPath(Provider.STRING_SET_URI, String.format("%d", TreasurerContract.StringSet.UNKNOWN_PAYEE_SET)),

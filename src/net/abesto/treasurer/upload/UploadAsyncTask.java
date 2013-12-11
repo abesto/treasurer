@@ -4,7 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Pair;
-import net.abesto.treasurer.SimpleAlertDialog;
+import net.abesto.treasurer.ui.SimpleAlertDialog;
 import net.abesto.treasurer.upload.Uploader.UploadFailed;
 
 public class UploadAsyncTask extends

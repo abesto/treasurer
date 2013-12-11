@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import net.abesto.treasurer.TreasurerContract;
 import net.abesto.treasurer.model.*;
-import net.abesto.treasurer.provider.Provider;
 
 import java.util.GregorianCalendar;
 import java.util.LinkedList;

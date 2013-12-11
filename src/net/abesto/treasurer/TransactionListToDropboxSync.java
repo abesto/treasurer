@@ -9,7 +9,7 @@ import com.dropbox.sync.android.DbxFileSystem;
 import com.dropbox.sync.android.DbxPath;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.Transaction;
-import net.abesto.treasurer.provider.Provider;
+import net.abesto.treasurer.database.Provider;
 import net.abesto.treasurer.upload.ynab.YNABStringBuilder;
 
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import net.abesto.treasurer.R;
 import net.abesto.treasurer.parsers.ParserFactory;
 import net.abesto.treasurer.parsers.SmsParserDatabaseAdapter;
 import org.apache.commons.lang3.time.DateFormatUtils;

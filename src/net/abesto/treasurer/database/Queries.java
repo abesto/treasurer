@@ -8,7 +8,6 @@ import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.Model;
 import net.abesto.treasurer.model.Transaction;
 import net.abesto.treasurer.model.UnknownPayee;
-import net.abesto.treasurer.provider.Provider;
 
 import java.util.List;
 

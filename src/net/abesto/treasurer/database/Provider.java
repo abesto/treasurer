@@ -1,4 +1,4 @@
-package net.abesto.treasurer.provider;
+package net.abesto.treasurer.database;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -10,6 +10,8 @@ import android.net.Uri;
 import net.abesto.treasurer.database.StringSetTable;
 import net.abesto.treasurer.database.TreasurerDatabaseHelper;
 import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.HashMap;
 
 import static net.abesto.treasurer.TreasurerContract.*;
 
@@ -65,10 +67,24 @@ public class Provider extends ContentProvider {
         if (uriType == TRANSACTIONS || uriType == TRANSACTION_ID) {
             queryBuilder.setTables(Transaction.TABLE_NAME + " LEFT JOIN " + Category.TABLE_NAME +
                     " ON " + Transaction.CATEGORY_ID + "=" + Category.FULL_ID);
-            if (ArrayUtils.contains(projection, Transaction.COMPUTED_FLOW)) {
-                projection[ArrayUtils.indexOf(projection, Transaction.COMPUTED_FLOW)] =
-                        Transaction.INFLOW + "-" + Transaction.OUTFLOW + " as " + Transaction.COMPUTED_FLOW;
+            HashMap<String, String> projectionMap = new HashMap<>();
+            if (projection == null) projection = new String[] {
+                    Transaction.CATEGORY_ID,
+                    Transaction.COMPUTED_FLOW,
+                    Transaction.DATE,
+                    Transaction.INFLOW,
+                    Transaction.MEMO,
+                    Transaction.OUTFLOW,
+                    Transaction.PAYEE,
+                    Category.NAME
+            };
+            for (String field : projection) {
+                projectionMap.put(field, field);
             }
+            projectionMap.put(Transaction.COMPUTED_FLOW,
+                    String.format("%s-%s as %s", Transaction.INFLOW, Transaction.OUTFLOW, Transaction.COMPUTED_FLOW));
+            projectionMap.put(Transaction._ID, Transaction.FULL_ID);
+            queryBuilder.setProjectionMap(projectionMap);
             if (uriType == TRANSACTION_ID) {
                 queryBuilder.appendWhere(Transaction.FULL_ID + "=" + uri.getLastPathSegment());
             }

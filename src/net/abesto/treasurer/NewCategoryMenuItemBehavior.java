@@ -3,6 +3,7 @@ package net.abesto.treasurer;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
+import net.abesto.treasurer.ui.ConcreteDialogFactory;
 
 public class NewCategoryMenuItemBehavior {
     Activity activity;

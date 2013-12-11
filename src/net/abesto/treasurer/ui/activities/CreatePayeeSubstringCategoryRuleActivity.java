@@ -1,4 +1,4 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui.activities;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -11,9 +11,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import net.abesto.treasurer.NewCategoryMenuItemBehavior;
+import net.abesto.treasurer.R;
+import net.abesto.treasurer.SelectableSimpleCursorAdapter;
+import net.abesto.treasurer.TreasurerContract;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
-import net.abesto.treasurer.provider.Provider;
+import net.abesto.treasurer.database.Provider;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class CreatePayeeSubstringCategoryRuleActivity extends Activity {

@@ -1,4 +1,4 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.util.Log;
 import net.abesto.treasurer.database.Queries;
 import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.PayeeSubstringToCategory;
+import net.abesto.treasurer.ui.TextInputDialogBuilder;
+import net.abesto.treasurer.ui.activities.PayeeListActivity;
 
 public class ConcreteDialogFactory {
     private Context context;

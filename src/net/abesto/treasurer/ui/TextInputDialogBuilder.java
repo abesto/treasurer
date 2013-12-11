@@ -1,4 +1,4 @@
-package net.abesto.treasurer;
+package net.abesto.treasurer.ui;
 
 import android.app.AlertDialog;
 import android.content.Context;
