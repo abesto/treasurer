@@ -12,6 +12,12 @@ public class ParserFactory {
 
     public SmsParser buildFromConfig() {
         // Will build a parser based on settings once said settings exist
-        return new OTPCreditCardPaymentParser();
+        return new AggregateParser(
+                new OTPCreditCardPaymentParser(),
+                new OTPCashWithdrawalParser(),
+                new OTPCashTransactionCostParser(),
+                new OTPTransferParser(),
+                new OTPOneTimeTransferCostParser()
+        );
     }
 }

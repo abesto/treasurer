@@ -8,23 +8,24 @@ import java.util.GregorianCalendar;
 
 import static org.junit.Assert.*;
 
-public class OTPCreditCardUsageParserTest {
+public class OTPOneTimeTransferCostParserTest {
     @Test
     public void testParse() throws Exception {
-        SmsParser p = new OTPCreditCardPaymentParser();
+        SmsParser p = new OTPOneTimeTransferCostParser();
         assertFalse(p.parse("foobar", null).isSuccess());
 
-        ParseResult r = p.parse("131206 09:54 Kàrtyàs vàsàrlàs/zàrolàs: -29.867 HUF; ONLINE ?GYF?LSZOLG.,BI; Kàrtyaszàm: ...5918; Egyenleg: 123.456 HUF - OTPdirekt", null);
+        ParseResult r = p.parse("...0418 Szàmla (131216) ESETI MEGBIZàSOK KÖLTSÉGE:-278,-HUF; Egy:+123.456,-HUF; OTPdirekt", null);
         assertTrue(r.isSuccess());
         Transaction t = r.getTransaction();
         GregorianCalendar d = t.getDate();
         assertEquals(2013, d.get(Calendar.YEAR));
         assertEquals(11, d.get(Calendar.MONTH));
-        assertEquals(6, d.get(Calendar.DAY_OF_MONTH));
-        assertEquals(9, d.get(Calendar.HOUR_OF_DAY));
-        assertEquals(54, d.get(Calendar.MINUTE));
+        assertEquals(16, d.get(Calendar.DAY_OF_MONTH));
+        assertEquals(0, d.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, d.get(Calendar.MINUTE));
         assertEquals(0, t.getInflow().intValue());
-        assertEquals(29867, t.getOutflow().intValue());
-        assertEquals("ONLINE ?GYF?LSZOLG.,BI", t.getPayee());
+        assertEquals(278, t.getOutflow().intValue());
+        assertEquals("OTP", t.getPayee());
+        assertEquals("Eseti megbízások költsége", t.getMemo());
     }
 }

@@ -31,6 +31,7 @@ public class TransactionListFragment extends ListFragment implements LoaderManag
             TreasurerContract.Transaction.COMPUTED_FLOW,
             TreasurerContract.Transaction.PAYEE,
             TreasurerContract.Transaction.DATE,
+            TreasurerContract.Transaction.MEMO,
             TreasurerContract.Transaction._ID };
 
     private SimpleCursorAdapter adapter;
@@ -48,7 +49,7 @@ public class TransactionListFragment extends ListFragment implements LoaderManag
             getLoaderManager().initLoader(LOADER_ID, null, this);
             adapter =  new SimpleCursorAdapter(
                     getActivity(), R.layout.transaction_list_item, null, columns,
-                    new int[] {R.id.flow, R.id.payee, R.id.date}, 0){
+                    new int[] {R.id.flow, R.id.payee, R.id.date, R.id.memo}, 0){
                 private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
 
                 @Override
