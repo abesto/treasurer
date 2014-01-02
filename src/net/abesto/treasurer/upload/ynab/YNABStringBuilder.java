@@ -2,10 +2,9 @@ package net.abesto.treasurer.upload.ynab;
 
 import net.abesto.treasurer.model.FailedToParseSms;
 import net.abesto.treasurer.model.Transaction;
+import net.abesto.treasurer.upload.UploadData;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class YNABStringBuilder {
 	private static final String csvHeader = "Date,Payee,Category,Memo,Outflow,Inflow";
@@ -14,7 +13,7 @@ public class YNABStringBuilder {
 		StringBuilder s = new StringBuilder();
 		s.append(YNABDateFormatter.formatDate(t.getDate().getTime())).append(',');
 		s.append('"').append(t.getPayee()).append('"').append(',');
-		s.append('"').append(t.getCategoryName()).append('"').append(',');
+		s.append("\"\",");  // No category
 		s.append('"').append(t.getMemo()).append('"').append(',');
 		s.append(t.getOutflow()).append(',');
 		s.append(t.getInflow()).append(',');
@@ -30,28 +29,17 @@ public class YNABStringBuilder {
 		return s.toString();
 	}
 
-	public static String toCsv(YNABUploadData data) {
-		List<Transaction> transactions = data.goodTransactions.subList(0, data.goodTransactions.size());
-		transactions.addAll(data.noCategoryTransactions);
+	public static String toCsv(UploadData data) {
+		List<Transaction> transactions = data.getTransactions().subList(0, data.getTransactions().size());
 		return YNABStringBuilder.listToCsv(transactions);
 	}
 	
-	public static String buildReport(YNABUploadData data) {		
-		StringBuilder sb = new StringBuilder(data.title).append("\n");
-		sb.append(data.goodTransactions.size()).append(" transactions successfully parsed\n\n");
-		
-		sb.append(data.noCategoryTransactions.size()).append(" transactions had unknown payees. Payees:\n");
-		Set<String> seenPayees = new HashSet<String>();
-		for (Transaction t : data.noCategoryTransactions) {
-			String payee = t.getPayee();
-			if (seenPayees.contains(payee)) continue;
-			sb.append(payee).append("\n");
-			seenPayees.add(payee);
-		}
-		sb.append("\n");
-		
-		sb.append("Failed to parse ").append(data.failedToParse.size()).append(" SMS messages\n");
-		for (FailedToParseSms line : data.failedToParse) {
+	public static String buildReport(UploadData data) {
+		StringBuilder sb = new StringBuilder(data.getTitle()).append("\n");
+		sb.append(data.getTransactions().size()).append(" transactions successfully parsed\n\n");
+
+		sb.append("Failed to parse ").append(data.getFailedToParse().size()).append(" SMS messages\n");
+		for (FailedToParseSms line : data.getFailedToParse()) {
 			sb.append(line.getMessage()).append("\n");
 		}
 		

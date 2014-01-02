@@ -14,11 +14,13 @@ import java.util.List;
 public class UploadData {
 	private List<Transaction> transactions;
 	private List<FailedToParseSms> failedToParse;
+    private Context context;
 	
-	public UploadData(List<Transaction> transactions, List<FailedToParseSms> failedToParse) {
+	public UploadData(List<Transaction> transactions, List<FailedToParseSms> failedToParse, Context context) {
 		super();
 		this.transactions = transactions;
 		this.failedToParse = failedToParse;
+        this.context = context;
 	}
 	public List<Transaction> getTransactions() {
 		return transactions;
@@ -27,10 +29,11 @@ public class UploadData {
 		return failedToParse;
 	}
 
-    public static UploadData fromProvider() {
+    public static UploadData fromProvider(Context context) {
         return new UploadData(
                 Queries.getAppInstance().list(Transaction.class),
-                Queries.getAppInstance().list(FailedToParseSms.class)
+                Queries.getAppInstance().list(FailedToParseSms.class),
+                context
         );
     }
 
@@ -39,7 +42,7 @@ public class UploadData {
         return DateFormat.getDateInstance().format(c.getTime());
     }
 
-    public String getTitle(Context context) {
+    public String getTitle() {
         Calendar earliest = null, latest = null;
 
         for (Transaction t : getTransactions()) {

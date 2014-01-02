@@ -10,7 +10,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.DatePicker;
 import net.abesto.treasurer.R;
 import net.abesto.treasurer.parsers.ParserFactory;
@@ -62,10 +61,6 @@ public class LoadActivity extends Activity {
         Calendar calendar = Calendar.getInstance();
         calendar.set(picker.getYear(), picker.getMonth(), picker.getDayOfMonth());
         return calendar;
-    }
-
-    public void onCancelClicked(@SuppressWarnings("UnusedParameters") View v) {
-        finish();
     }
 
     private void updateDatePickerWithCalendar(int id, Calendar cal) {

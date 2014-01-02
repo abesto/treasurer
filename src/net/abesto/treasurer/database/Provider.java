@@ -7,9 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import net.abesto.treasurer.database.StringSetTable;
-import net.abesto.treasurer.database.TreasurerDatabaseHelper;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.HashMap;
 
@@ -20,36 +17,20 @@ public class Provider extends ContentProvider {
 
     private static final String AUTHORITY = "net.abesto.treasurer.provider";
     private static final String TRANSACTIONS_PATH = "transactions";
-    private static final String CATEGORIES_PATH = "categories";
-    private static final String CATEGORIES_GET_OR_CREATE_PATH = "categories/get-or-create";
-    private static final String PAYEE_SUBSTRING_TO_CATEGORY_PATH = "payee-substring-to-category-rules";
     private static final String STRING_SET_PATH = "stringset";
 
     private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY + "/");
     public static final Uri TRANSACTIONS_URI = Uri.withAppendedPath(BASE_URI, TRANSACTIONS_PATH);
-    public static final Uri CATEGORIES_URI = Uri.withAppendedPath(BASE_URI, CATEGORIES_PATH);
-    public static final Uri CATEGORIES_GET_OR_CREATE_URI = Uri.withAppendedPath(BASE_URI, CATEGORIES_GET_OR_CREATE_PATH);
-    public static final Uri PAYEE_SUBSTRING_TO_CATEGORY_URI = Uri.withAppendedPath(BASE_URI, PAYEE_SUBSTRING_TO_CATEGORY_PATH);
     public static final Uri STRING_SET_URI = Uri.withAppendedPath(BASE_URI, STRING_SET_PATH);
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private static final int TRANSACTIONS = 10;
     private static final int TRANSACTION_ID = 11;
-    private static final int CATEGORIES = 12;
-    private static final int CATEGORY_ID = 13;
-    private static final int CATEGORY_GET_OR_CREATE = 14;
-    private static final int PAYEE_SUBSTRING_TO_CATEGORY_RULES = 15;
-    private static final int PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID = 16;
     private static final int STRING_SETS = 17;
     private static final int STRING_SET_ID = 18;
     static {
         sUriMatcher.addURI(AUTHORITY, TRANSACTIONS_PATH, TRANSACTIONS);
         sUriMatcher.addURI(AUTHORITY, TRANSACTIONS_PATH + "/#", TRANSACTION_ID);
-        sUriMatcher.addURI(AUTHORITY, CATEGORIES_PATH, CATEGORIES);
-        sUriMatcher.addURI(AUTHORITY, CATEGORIES_PATH + "/#", CATEGORY_ID);
-        sUriMatcher.addURI(AUTHORITY, CATEGORIES_GET_OR_CREATE_PATH + "/*", CATEGORY_GET_OR_CREATE);
-        sUriMatcher.addURI(AUTHORITY, PAYEE_SUBSTRING_TO_CATEGORY_PATH, PAYEE_SUBSTRING_TO_CATEGORY_RULES);
-        sUriMatcher.addURI(AUTHORITY, PAYEE_SUBSTRING_TO_CATEGORY_PATH + "/#", PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID);
         sUriMatcher.addURI(AUTHORITY, STRING_SET_PATH, STRING_SETS);
         sUriMatcher.addURI(AUTHORITY, STRING_SET_PATH + "/#", STRING_SET_ID);
     }
@@ -65,18 +46,15 @@ public class Provider extends ContentProvider {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         int uriType = sUriMatcher.match(uri);
         if (uriType == TRANSACTIONS || uriType == TRANSACTION_ID) {
-            queryBuilder.setTables(Transaction.TABLE_NAME + " LEFT JOIN " + Category.TABLE_NAME +
-                    " ON " + Transaction.CATEGORY_ID + "=" + Category.FULL_ID);
+            queryBuilder.setTables(Transaction.TABLE_NAME);
             HashMap<String, String> projectionMap = new HashMap<>();
             if (projection == null) projection = new String[] {
-                    Transaction.CATEGORY_ID,
                     Transaction.COMPUTED_FLOW,
                     Transaction.DATE,
                     Transaction.INFLOW,
                     Transaction.MEMO,
                     Transaction.OUTFLOW,
-                    Transaction.PAYEE,
-                    Category.NAME
+                    Transaction.PAYEE
             };
             for (String field : projection) {
                 projectionMap.put(field, field);
@@ -87,18 +65,6 @@ public class Provider extends ContentProvider {
             queryBuilder.setProjectionMap(projectionMap);
             if (uriType == TRANSACTION_ID) {
                 queryBuilder.appendWhere(Transaction.FULL_ID + "=" + uri.getLastPathSegment());
-            }
-        } else if (uriType == CATEGORY_GET_OR_CREATE) {
-            return getOrCreateCategoryId(uri.getLastPathSegment(), projection, selection, selectionArgs);
-        } else if (uriType == CATEGORIES || uriType == CATEGORY_ID) {
-            queryBuilder.setTables(Category.TABLE_NAME);
-            if (uriType == CATEGORY_ID) {
-                queryBuilder.appendWhere(Category.FULL_ID + "=" + uri.getLastPathSegment());
-            }
-        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES || uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
-            queryBuilder.setTables(PayeeSubstringToCategory.TABLE_NAME);
-            if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
-                queryBuilder.appendWhere(PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment());
             }
         } else if (uriType == STRING_SETS || uriType == STRING_SET_ID) {
             queryBuilder.setTables(StringSet.TABLE_NAME);
@@ -131,14 +97,8 @@ public class Provider extends ContentProvider {
         int uriType = sUriMatcher.match(uri);
         if (uriType == TRANSACTIONS) {
             return insertToSqlite(uri, contentValues, Transaction.TABLE_NAME);
-        } else if (uriType == CATEGORIES) {
-            return insertToSqlite(uri, contentValues, Category.TABLE_NAME);
-        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULES) {
-            return insertToSqlite(uri, contentValues, PayeeSubstringToCategory.TABLE_NAME);
         } else if (uriType == STRING_SETS) {
             return insertToSqlite(uri, contentValues, StringSetTable.TABLE_NAME);
-        } else if (uriType == TRANSACTION_ID || uriType == CATEGORY_ID) {
-            throw new IllegalArgumentException("URI " + uri + " not valid for insert operation");
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -161,10 +121,6 @@ public class Provider extends ContentProvider {
             rowsDeleted = sqlDB.delete(Transaction.TABLE_NAME, Transaction._ID + "=" + uri.getLastPathSegment(), null);
         } else if (uriType == TRANSACTIONS) {
             rowsDeleted = sqlDB.delete(Transaction.TABLE_NAME, selection, selectionArgs);
-        } else if (uriType == PAYEE_SUBSTRING_TO_CATEGORY_RULE_ID) {
-            rowsDeleted = sqlDB.delete(PayeeSubstringToCategory.TABLE_NAME, PayeeSubstringToCategory._ID + "=" + uri.getLastPathSegment(), null);
-        } else if (uriType == CATEGORY_ID) {
-            rowsDeleted = sqlDB.delete(Category.TABLE_NAME, Category._ID + "=" + uri.getLastPathSegment(), null);
         } else if (uriType == STRING_SET_ID) {
             rowsDeleted = sqlDB.delete(StringSet.TABLE_NAME, StringSet._ID + "=" + uri.getLastPathSegment(), null);
         } else {
@@ -189,30 +145,11 @@ public class Provider extends ContentProvider {
                     contentValues,
                     Transaction.FULL_ID + "=" + uri.getLastPathSegment(),
                     null);
-        } else if (uriType == CATEGORY_ID) {
-            rowsUpdated = sqlDB.update(Category.TABLE_NAME,
-                    contentValues,
-                    Category.FULL_ID + "=" + uri.getLastPathSegment(),
-                    null);
         } else {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         getContext().getContentResolver().notifyChange(TRANSACTIONS_URI, null);  // Update transaction list showing category names
         return rowsUpdated;
-    }
-
-    public Cursor getOrCreateCategoryId(String name, String[] projection, String selection, String[] selectionArgs) {
-        Cursor c = query(CATEGORIES_URI, projection, Category.NAME + "=?", new String[]{name}, null);
-        if (c.getCount() == 0) {
-            ContentValues v = new ContentValues();
-            v.put(Category.NAME, name);
-            return query(
-                    insert(CATEGORIES_URI, v),
-                    projection, selection, selectionArgs, null
-            );
-        } else {
-            return c;
-        }
     }
 }

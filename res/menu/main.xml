@@ -14,15 +14,6 @@
         android:id="@+id/main_action_link_dropbox"
         android:title="@string/action_link_dropbox"/>
     <item
-        android:id="@+id/main_action_reload"
-        android:title="@string/action_reload"/>
-    <item
-        android:id="@+id/main_action_payee_rules"
-        android:title="@string/action_payee_rules"/>
-    <item
-        android:id="@+id/action_unknown_payees"
-        android:title="@string/unknown_payees"/>
-    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"/>
 </menu>

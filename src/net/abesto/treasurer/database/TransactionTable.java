@@ -9,7 +9,6 @@ public class TransactionTable implements TreasurerContract.Transaction {
             _ID + " integer primary key autoincrement, " +
             DATE + " date not null, " +
             PAYEE + " integer, " +
-            CATEGORY_ID + " integer references " + TreasurerContract.Category.TABLE_NAME + " on delete set null, " +
             MEMO + " text, " +
             OUTFLOW + " integer not null, " +
             INFLOW + " integer not null " +

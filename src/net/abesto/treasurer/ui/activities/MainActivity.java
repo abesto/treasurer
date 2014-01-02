@@ -10,11 +10,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import net.abesto.treasurer.DbxAccountManagerFactory;
 import net.abesto.treasurer.R;
-import net.abesto.treasurer.ui.SimpleAlertDialog;
 import net.abesto.treasurer.TransactionListToDropboxSync;
-import net.abesto.treasurer.database.Queries;
-import net.abesto.treasurer.filters.PayeeToCategoryFilter;
 import net.abesto.treasurer.database.Provider;
+import net.abesto.treasurer.database.Queries;
+import net.abesto.treasurer.ui.SimpleAlertDialog;
 import net.abesto.treasurer.ui.fragments.TransactionListFragment;
 import net.abesto.treasurer.upload.DataProvider;
 import net.abesto.treasurer.upload.UploadAsyncTask;
@@ -27,7 +26,6 @@ public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_CODE_LOAD = 1;
-    private static final int REQUEST_CODE_PAYEE_RULES = 2;
     private static final int REQUEST_CODE_LINK_DROPBOX = 3;
 
 	@Override
@@ -54,17 +52,8 @@ public class MainActivity extends Activity {
         startActivityForResult(intent, REQUEST_CODE_LOAD);
     }
 
-    public void openCategoryEditor() {
-        Log.i(TAG, "edit_payee_rules_clicked");
-        Intent intent = new Intent(this, CategoryListActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_PAYEE_RULES);
-    }
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
-            case REQUEST_CODE_PAYEE_RULES:
-                Log.i(TAG, CategoryListActivity.TAG + " finished");
-                break;
             case REQUEST_CODE_LINK_DROPBOX:
                 Log.i(TAG, "dropbox_link_done " + resultCode);
                 break;
@@ -99,7 +88,7 @@ public class MainActivity extends Activity {
         removeCacheFiles();
         UploadData data;
         try {
-            data = UploadData.fromProvider();
+            data = UploadData.fromProvider(this);
         } catch (Exception e) {
             SimpleAlertDialog.show(this, "Failed to load data", e.toString());
             Log.e(TAG, "uplaod_data_from_provider_failed", e);
@@ -131,10 +120,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void reload() {
-        PayeeToCategoryFilter.loadTestData();
-    }
-
     private void linkDropboxAccount() {
         DbxAccountManagerFactory.build(getApplicationContext()).startLink(this, REQUEST_CODE_LINK_DROPBOX);
     }
@@ -142,12 +127,6 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.main_action_payee_rules:
-                openCategoryEditor();
-                return true;
-            case R.id.main_action_reload:
-                reload();
-                return true;
             case R.id.main_action_clear:
                 clear();
                 return true;
@@ -159,9 +138,6 @@ public class MainActivity extends Activity {
                 return true;
             case R.id.main_action_link_dropbox:
                 linkDropboxAccount();
-                return true;
-            case R.id.action_unknown_payees:
-                startActivity(new Intent(this, UnknownPayeeListActivity.class));
                 return true;
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));

@@ -23,7 +23,6 @@ public class OTPCreditCardPaymentParser implements SmsParser {
                         Integer.parseInt(m.group(5))
 				),
 				m.group(7), // payee
-                null,       // no category
 				"",         // memo
 				Integer.parseInt(m.group(6).replaceAll("\\.", ""), 10),  // outflow
 				0           // inflow

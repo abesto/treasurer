@@ -1,7 +1,5 @@
 package net.abesto.treasurer.parsers;
 
-import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-
 public class ParserFactory {
     private static ParserFactory instance;
     private ParserFactory() {}
@@ -14,8 +12,6 @@ public class ParserFactory {
 
     public SmsParser buildFromConfig() {
         // Will build a parser based on settings once said settings exist
-        return new ParserWithFilters(
-                new OTPCreditCardPaymentParser(),
-                new PayeeToCategoryFilter());
+        return new OTPCreditCardPaymentParser();
     }
 }

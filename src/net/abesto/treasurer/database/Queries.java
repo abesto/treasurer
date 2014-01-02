@@ -3,11 +3,7 @@ package net.abesto.treasurer.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import net.abesto.treasurer.filters.PayeeToCategoryFilter;
-import net.abesto.treasurer.model.Category;
 import net.abesto.treasurer.model.Model;
-import net.abesto.treasurer.model.Transaction;
-import net.abesto.treasurer.model.UnknownPayee;
 
 import java.util.List;
 
@@ -57,9 +53,6 @@ public class Queries {
         }
         return ModelInflater.inflate(cls, c);
     }
-    public Category getOrCreateCategory(String name) {
-        return get(Uri.withAppendedPath(Provider.CATEGORIES_GET_OR_CREATE_URI, name), Category.class);
-    }
 
     public <T extends Model> Uri insert(T obj) {
         if (obj.isIdSet()) {
@@ -93,18 +86,5 @@ public class Queries {
 
     public <T extends Model> int delete(T obj) {
         return delete(obj.getClass(), obj.getId());
-    }
-
-    public void reapplyAllFilters() {
-        PayeeToCategoryFilter filter = new PayeeToCategoryFilter();
-        for (Transaction t : list(Transaction.class)) {
-            filter.filter(t);
-            update(t);
-        }
-        for (UnknownPayee p : list(UnknownPayee.class)) {
-            if (filter.isPayeeKnown(p.getPayee())) {
-                delete(p);
-            }
-        }
     }
 }
